@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Notifications</title>
+    <link rel="icon" type="image/x-icon" href="images/lendora.svg">
+    <link rel="stylesheet" href="css/notification.css"> <!-- Ensure this CSS exists -->
+    <script src="js/config.js" defer></script>
+     <!-- jsPDF & AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <script src="js/notification.js" defer></script>
+
+
+
+    <style>
+        /* Rolling Page Load Animation */
+        @keyframes rollIn {
+            0% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(30deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) rotate(0);
+            }
+        }
+
+        .rolling-load {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #14213D;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            animation: rollOut 0.6s ease-out forwards;
+            animation-delay: 0.8s;
+        }
+
+        @keyframes rollOut {
+            to {
+                transform: translateY(-100vh) rotate(-15deg);
+                opacity: 0;
+            }
+        }
+
+        .rolling-load-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            border-top-color: #FCA311;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modern Table Styling */
+        .table-container {
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            overflow: hidden;
+            position: relative;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        thead {
+            position: relative;
+        }
+
+        th {
+            background: linear-gradient(135deg, #14213D, #1a2a4f);
+            color: white;
+            font-weight: 600;
+            padding: 18px 20px;
+            text-align: left;
+            border-bottom: none;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        th:first-child {
+            border-top-left-radius: 12px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 12px;
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: rgba(249, 249, 249, 0.8);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(252, 163, 17, 0.1);
+            transform: translateX(5px);
+        }
+
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            vertical-align: middle;
+            position: relative;
+        }
+
+        td:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #FCA311;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        tbody tr:hover td:before {
+            opacity: 1;
+        }
+
+        .repayments-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 15px 0 20px;
+        }
+
+        .summary-item {
+            flex: 1;
+            min-width: 160px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 14px 18px;
+            text-align: center;
+        }
+
+        .summary-item.summary-grand-total {
+            background: #14213D;
+            border-color: #14213D;
+        }
+
+        .summary-item.summary-grand-total .summary-label,
+        .summary-item.summary-grand-total .summary-value {
+            color: #fff;
+        }
+
+        .summary-label {
+            display: block;
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .summary-value {
+            display: block;
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #14213D;
+        }
+
+        .term-filter-group {
+            max-width: 260px;
+        }
+
+        #termTypeFilter {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #termTypeFilter:focus {
+            border-color: #FCA311;
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(252, 163, 17, 0.2);
+        }
+
+        @media (max-width: 480px) {
+            .term-filter-group {
+                max-width: 100%;
+            }
+
+            .summary-item {
+                min-width: 130px;
+                padding: 12px 14px;
+            }
+
+            .summary-value {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="css/lendora-theme.css">
+</head>
+<body>
+
+    <!-- Rolling Load Effect -->
+    <div class="rolling-load">
+        <div class="rolling-load-spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Custom Alert Container -->
+    <div id="customAlertContainer"></div>
+
+    <!-- Mobile menu toggle -->
+    <button id="menuToggle" class="menu-toggle" aria-label="Toggle menu">☰</button>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="logo-title">
+            <img src="images/lendora.svg" alt="Logo" class="logo">
+            <h2>LENDORA</h2>
+        </div>
+        <ul class="menu">
+            <li><a href="dashboard.html">🏠 Home</a></li>
+            <li><a href="customer.html">👥 Manage Customers</a></li>
+            <li><a href="loan.html">💰 Manage Loans</a></li>
+            <li><a href="loan-repayments.html">📄 Loan Repayments</a></li>
+            <li><a href="payment.html">💳 Payments</a></li>
+            <li class="active"><a href="notification.html">🔔 Notifications</a></li>
+            <li><a href="users.html">👤 Control Panel</a></li>
+            <li><a href="analysis.html">📊 Profit Analytics</a></li>
+            <li><a href="index.html" id="logout">🚪 Logout</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <div id="notificationsManagement">
+            <h2>🔔 Loan Notifications (Due Repayments)</h2>
+
+            <!-- Query Due Repayments Form -->
+            <div id="queryDuePaymentsSection" class="form-section card">
+                <h3>Query Repayments Due by Date Range</h3>
+                <form id="queryDuePaymentsForm">
+                    <div class="form-group">
+                        <label for="fromDate">From Date:</label>
+                        <input type="date" id="fromDate" name="fromDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="toDate">To Date:</label>
+                        <input type="date" id="toDate" name="toDate" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" id="queryPaymentsButton" class="submit-button">Query Payments</button>
+                        <button type="button" id="clearQueryButton" class="cancel-button">Clear</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Loan Notifications Table -->
+            <div id="loanNotificationsTableContainer" class="table-section card">
+                <h3>Due Repayments List</h3>
+
+                <div class="form-group term-filter-group">
+                    <label for="termTypeFilter">Filter by Loan Type:</label>
+                    <select id="termTypeFilter">
+                        <option value="all">All</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+
+                <div id="repaymentsSummary" class="repayments-summary hidden">
+                    <div class="summary-item">
+                        <span class="summary-label">Weekly Total</span>
+                        <span id="weeklyTotal" class="summary-value">₦0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Monthly Total</span>
+                        <span id="monthlyTotal" class="summary-value">₦0</span>
+                    </div>
+                    <div class="summary-item summary-grand-total">
+                        <span class="summary-label">Grand Total</span>
+                        <span id="grandTotal" class="summary-value">₦0</span>
+                    </div>
+                </div>
+
+                <div id="principalInterestSummary" class="repayments-summary hidden">
+                    <div class="summary-item">
+                        <span class="summary-label">Principal (This Query)</span>
+                        <span id="principalTotal" class="summary-value">₦0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Interest (This Query)</span>
+                        <span id="interestTotal" class="summary-value">₦0</span>
+                    </div>
+                </div>
+
+                <div id="thisWeekSummary" class="repayments-summary hidden">
+                    <div class="summary-item">
+                        <span class="summary-label">This Week - Actual (Due)</span>
+                        <span id="thisWeekActualTotal" class="summary-value">₦0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">This Week - Paid</span>
+                        <span id="thisWeekPaidTotal" class="summary-value">₦0</span>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="loanNotificationsTable">
+                        <thead>
+                            <tr>
+                                <th>Loan ID</th>
+                                <th>Customer Name</th>
+                                <th>Type</th>
+                                <th>Amount Due</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="loanNotificationsTableBody">
+                            <!-- Loan notifications/due repayments will be inserted here by JavaScript -->
+                            <tr><td colspan="6" style="text-align: center;">Select a date range and click Query Payments.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Export to PDF Button -->
+                <div class="form-actions" style="margin-top: 15px; text-align: right;">
+                    <button type="button" id="exportPdfButton" class="submit-button">📄 Export to PDF</button>
+                </div>
+
+                <!-- Pagination -->
+                <div id="notificationsPagination" class="pagination-controls"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Add this script to hide the rolling loader when page is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const rollingLoader = document.querySelector('.rolling-load');
+                if (rollingLoader) {
+                    rollingLoader.style.display = 'none';
+                }
+            }, 1000);
+        });
+
+        // Mobile sidebar toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            function openSidebar() {
+                sidebar.classList.add('open');
+                overlay.classList.add('visible');
+            }
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('visible');
+            }
+
+            menuToggle?.addEventListener('click', () => {
+                if (sidebar.classList.contains('open')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+
+            overlay?.addEventListener('click', closeSidebar);
+
+            sidebar?.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', closeSidebar);
+            });
+        });
+    </script>
+</body>
+</html>

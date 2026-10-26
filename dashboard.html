@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Management Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="images/lendora.svg">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <script src="js/config.js" defer></script>
+    <script src="js/dashboard.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Rolling Page Load Animation */
+        @keyframes rollIn {
+            0% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(30deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) rotate(0);
+            }
+        }
+
+        .rolling-load {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #14213D;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            animation: rollOut 0.6s ease-out forwards;
+            animation-delay: 0.8s;
+        }
+
+        @keyframes rollOut {
+            to {
+                transform: translateY(-100vh) rotate(-15deg);
+                opacity: 0;
+            }
+        }
+
+        .rolling-load-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            border-top-color: #FCA311;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modern Table Styling */
+        /* (Your existing table styling from profit_analytics.css will apply here) */
+
+        @keyframes fadeInUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Basic styling for loading indicator */
+        #loadingIndicator {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 8px;
+            z-index: 1000;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        #loadingIndicator .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid #FCA311;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px auto;
+        }
+
+        /* Style for disabled buttons */
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            background-color: #ccc; /* Or a specific disabled color */
+        }
+    </style>
+    <link rel="stylesheet" href="css/lendora-theme.css">
+</head>
+<body>
+
+    <!-- Mobile menu toggle -->
+    <button id="menuToggle" class="menu-toggle" aria-label="Toggle menu">☰</button>
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo-title">
+            <img src="images/lendora.svg" alt="Logo" class="logo">
+            <h2>LENDORA</h2>
+        </div>
+        <ul class="menu">
+            <li><a href="dashboard.html">🏠 Home</a></li>
+            <li><a href="customer.html">👥 Manage Customers</a></li>
+            <li><a href="loan.html">💰 Manage Loans</a></li>
+            <li><a href="loan-repayments.html">📄 Loan Repayments</a></li>
+            <li><a href="payment.html">💳 Payments</a></li>
+            <li><a href="notification.html">🔔 Notifications</a></li>
+            <li><a href="users.html">👤 Control Panel</a></li>
+            <li><a href="analysis.html">📊 Profit Analytics</a></li>
+            <li><a href="index.html" id="logout">🚪 Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="welcome-message">
+                <h2><span id="greetingText" class="typing"></span></h2>
+                <p id="dateTimeDisplay"></p>
+            </div>
+        </div>
+
+        <!-- Dashboard Cards -->
+        <div class="dashboard-cards">
+            <div class="card">
+                <h3>Total Loans</h3>
+                <p id="total-loans">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Pending Approvals</h3>
+                <p id="pending-loans">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Active Loans</h3>
+                <p id="active-loans">0</p>
+            </div>
+
+            <!-- NEW: Complete Loans Card -->
+            <div class="card dual-card">
+                <h3>Complete Loans</h3>
+                <div class="dual-value">
+                    <div class="dual-value-item">
+                        <span class="dual-value-label">Number Completed</span>
+                        <p id="completed-loans-count">0</p>
+                    </div>
+                    <div class="dual-value-item">
+                        <span class="dual-value-label">Total Amount</span>
+                        <p id="completed-loans-amount">₦0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Overdue Loans</h3>
+                <p id="overdue-loans">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Total Customers</h3>
+                <p id="total-customers">0</p>
+            </div>
+
+            <div class="card">
+                <h3>Due Payments (Today)</h3>
+                <p id="due-payments">₦0</p>
+            </div>
+
+            <div class="card">
+                <h3>Total Principal</h3>
+                <p id="total-principal">₦0</p>
+            </div>
+
+            <div class="card">
+                <h3>Total Interest</h3>
+                <p id="total-interest">₦0</p>
+            </div>
+
+            <div class="card dual-card">
+                <h3>Due Payments (This Month)</h3>
+                <div class="dual-value">
+                    <div class="dual-value-item">
+                        <span class="dual-value-label">Actual</span>
+                        <p id="due-month-actual">₦0</p>
+                    </div>
+                    <div class="dual-value-item">
+                        <span class="dual-value-label">Paid</span>
+                        <p id="due-month-paid">₦0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Total Loan Book Value</h3>
+                <p id="total-loan-book-value">₦0</p>
+            </div>
+
+            <div class="card">
+                <h3>Total Active Loan Value</h3>
+                <p id="total-active-loan-value">₦0</p>
+            </div>
+        </div>
+
+        <!-- Loan Analytics Section -->
+        <div class="analytics">
+            <h2>📊 Loan Analytics</h2>
+            <canvas id="loanChart"></canvas>
+        </div>
+
+        <!-- Transactions Section -->
+        <div class="transactions">
+            <h2>📋 Recent Transactions</h2>
+            <div class="table-scroll">
+                <table>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                    <!-- Transactions will be dynamically inserted here by JavaScript -->
+                </table>
+            </div>
+        </div>
+
+        <!-- Announcements Section -->
+        <div class="announcements">
+            <h2>📢 Announcements</h2>
+            <ul>
+                <li>🚀 New loan plans available from next month!</li>
+                <li>💳 Payment due reminders will be sent every Friday.</li>
+                <li>📈 Loan interest rates updated.</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <script>
+        // Add this script to hide the rolling loader when page is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const rollingLoader = document.querySelector('.rolling-load');
+                if (rollingLoader) {
+                    rollingLoader.style.display = 'none';
+                }
+            }, 1000);
+        });
+
+        // Mobile sidebar toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            function openSidebar() {
+                sidebar.classList.add('open');
+                overlay.classList.add('visible');
+            }
+
+            function closeSidebar() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('visible');
+            }
+
+            menuToggle?.addEventListener('click', () => {
+                if (sidebar.classList.contains('open')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+
+            overlay?.addEventListener('click', closeSidebar);
+
+            // Close sidebar when a nav link is tapped (mobile)
+            sidebar?.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', closeSidebar);
+            });
+        });
+    </script>
+
+</body>
+</html>
+```
+

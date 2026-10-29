@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -350,20 +351,20 @@
                         </select>
                     </div>
                     <div class="table-scroll">
-                    <table id="manageLoansTable">
-                        <thead>
-                            <tr>
-                                <th>Loan ID</th>
-                                <th>Customer Name</th>
-                                <th>Amount</th>
-                                <th>Type</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="manageLoansTableBody">
+                        <table id="manageLoansTable">
+                            <thead>
+                                <tr>
+                                    <th>Loan ID</th>
+                                    <th>Customer Name</th>
+                                    <th>Amount</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="manageLoansTableBody">
                             </tbody>
-                    </table>
+                        </table>
                     </div>
                     <div id="manageLoansPagination" class="pagination-controls"></div>
                     <button id="manageLoansGoBackBtn" class="action-button go-back-button">Go Back</button>
@@ -374,20 +375,20 @@
                 <div class="table-container">
                     <h3>Approve Loans</h3>
                     <div class="table-scroll">
-                    <table id="approveLoansTable">
-                        <thead>
-                            <tr>
-                                <th>Loan ID</th>
-                                <th>Customer Name</th>
-                                <th>Amount</th>
-                                <th>Type</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="approveLoansTableBody">
+                        <table id="approveLoansTable">
+                            <thead>
+                                <tr>
+                                    <th>Loan ID</th>
+                                    <th>Customer Name</th>
+                                    <th>Amount</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="approveLoansTableBody">
                             </tbody>
-                    </table>
+                        </table>
                     </div>
                     <div id="approveLoansPagination" class="pagination-controls"></div>
                     <button id="approveLoansGoBackBtn" class="action-button go-back-button">Go Back</button>
@@ -398,7 +399,7 @@
 
     <div id="loanDetailsModal" class="modal hidden">
         <div class="modal-content">
-            </div>
+        </div>
     </div>
 
     <!-- Approve Loan modal — lets the admin review/override amount, interest rate, and duration before approving -->
@@ -422,6 +423,19 @@
                 <input type="number" id="approveDurationInput" min="1" required>
                 <span class="approve-field-hint" id="approveDurationHint">Number of installments (term type stays as applied for).</span>
             </div>
+
+            <!-- Added: monthly repayment structure selection -->
+            <div class="approve-field" id="approveStructureField" style="display: none;">
+                <label for="approveStructureInput">Monthly Repayment Structure</label>
+                <select id="approveStructureInput">
+                    <option value="0">Flat Rate</option>
+                    <option value="1">Reducing Balance</option>
+                </select>
+                <span class="approve-field-hint">
+                    Choose how interest is calculated for this monthly loan.
+                </span>
+            </div>
+
             <div class="approve-actions">
                 <button type="button" id="approveConfirmBtn" class="approve-confirm-btn">Confirm Approval</button>
                 <button type="button" id="approveCancelBtn" class="approve-cancel-btn">Cancel</button>
@@ -431,7 +445,7 @@
 
     <div id="successMessageModal" class="modal hidden">
         <div class="modal-content">
-            </div>
+        </div>
     </div>
 
     <script>

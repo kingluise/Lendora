@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', () => {
     const loanManagementSection = document.getElementById('loanManagement');
     const addLoanBtn = document.getElementById('addLoanBtn');
@@ -27,7 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const approveDurationInput = document.getElementById('approveDurationInput');
     const approveDurationHint = document.getElementById('approveDurationHint');
     const approveNote = document.getElementById('approveNote');
+
+    // Added: Monthly repayment structure controls
+    const approveStructureField = document.getElementById('approveStructureField');
+    const approveStructureInput = document.getElementById('approveStructureInput');
+
     let currentApproveLoanId = null;
+    let currentApproveLoanTermType = '';
 
     // Same duration limits used on the Add Loan form, applied per the loan's own term type
     const getDurationLimits = (termType) => {
@@ -43,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const durationInput = document.getElementById('duration');
 
     const getAuthToken = () => {
-        return localStorage.getItem('token'); 
+        return localStorage.getItem('token');
     };
 
     const sections = [addLoanFormSection, manageLoansTableContainer, approveLoansTableContainer];
@@ -84,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const token = getAuthToken();
+
         if (!token) {
             alert('Authentication token is missing. Please log in again.');
             return;
@@ -93,20 +101,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = {
             customerId: formData.get("customerId"),
             fullName: formData.get("fullName"),
-            // Convert loanAmount string to a number and use the 'principal' key
             principal: parseFloat(formData.get("loanAmount")),
-            // Convert interestRate string to a number
             interestRate: parseFloat(formData.get("interestRate")),
             loanPurpose: formData.get("loanPurpose"),
-            // Change the key to match the backend's TermType and ensure correct capitalization
             TermType: loanTermSelect.value.charAt(0).toUpperCase() + loanTermSelect.value.slice(1),
-            // Convert duration string to an integer
             durationValue: parseInt(formData.get("duration")),
         };
-        
-        console.log("Submitting with data:", data); // Log the data being sent
-        
-        // --- ADDED VALIDATION LOGIC ---
+
+        console.log("Submitting with data:", data);
+
         // Check for non-numeric values
         if (isNaN(data.principal) || isNaN(data.durationValue)) {
             alert("Please ensure Loan Amount and Duration are valid numbers.");
@@ -131,10 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify(data),
             });
-            
+
             const result = await response.json();
+
             if (response.ok) {
-                // Populate the modal with a success message before showing it
                 const modalContent = successMessageModal.querySelector('.modal-content');
                 modalContent.innerHTML = `
                     <span class="close-button" id="successCloseBtn">&times;</span>
@@ -142,12 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p>Your loan has been successfully submitted for review.</p>
                     <button id="successOkBtn">OK</button>
                 `;
-                
-                // Add event listeners to the new buttons
+
                 document.getElementById('successCloseBtn').addEventListener('click', () => hideModal(successMessageModal));
                 document.getElementById('successOkBtn').addEventListener('click', () => hideModal(successMessageModal));
 
-                // Add styling to make the modal look better
                 modalContent.style.maxWidth = '400px';
                 modalContent.style.margin = '20% auto';
                 modalContent.style.padding = '20px';
@@ -158,7 +159,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 showModal(successMessageModal);
                 loanApplicationForm.reset();
             } else {
-                // Check for specific validation errors from the backend
                 if (response.status === 400 && result.errors) {
                     const errorMessages = Object.values(result.errors).flat().join('\n');
                     alert(`Validation Errors:\n${errorMessages}`);
@@ -183,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         'Authorization': `Bearer ${token}`
                     }
                 });
+
                 if (response.ok) {
                     const customer = await response.json();
                     fullNameInput.value = customer.fullName || '';
@@ -201,6 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loanTermSelect.addEventListener('change', () => {
         const term = loanTermSelect.value;
         durationInput.value = '';
+
         if (term === 'weekly') {
             durationInput.placeholder = '1-23 weeks';
             durationInput.min = 1;
@@ -225,21 +227,20 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Backend's LoanStatus enum names (must match exactly - the API parses this case-sensitively)
+        // Backend's LoanStatus enum names
         const statusMap = {
             pending: 'Pending',
             approved: 'Approved',
             rejected: 'Rejected',
-            declined: 'Rejected', // the filter dropdown option is labelled "Declined" but the real status is "Rejected"
+            declined: 'Rejected',
             completed: 'Completed',
             defaulted: 'Defaulted'
         };
 
         const params = new URLSearchParams();
-        // Fetch effectively "all" loans in one page rather than the default 10, so pending/approved/etc.
-        // loans that aren't in the first 10 by ID still show up.
         params.set('pageSize', '1000');
         params.set('pageNumber', '1');
+
         if (status && status !== 'all') {
             params.set('status', statusMap[status.toLowerCase()] || status);
         }
@@ -250,8 +251,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Authorization': `Bearer ${token}`
                 }
             });
+
             const result = await response.json();
-            
+
             if (response.ok) {
                 const loans = result.loans || [];
                 renderTable(loans, tableBody, tableType);
@@ -266,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderTable = (loans, tableBody, tableType) => {
         tableBody.innerHTML = '';
+
         if (loans.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="6">No loans found.</td></tr>';
             return;
@@ -277,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const type = loan.type || 'N/A';
             const status = loan.status || 'N/A';
             const customerName = loan.customerName || 'N/A';
-            
+
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${loanId}</td>
@@ -294,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${tableType === 'manage' && (status.toLowerCase() === 'approved' || status.toLowerCase() === 'defaulted') ? `
                         <button class="action-button complete-btn" data-loan-id="${loanId}">Complete</button>
                     ` : ''}
-                    ${tableType === 'manage' && (status.toLowerCase() === 'approved') ? `
+                    ${tableType === 'manage' && status.toLowerCase() === 'approved' ? `
                         <button class="action-button default-btn" data-loan-id="${loanId}">Default</button>
                     ` : ''}
                 </td>
@@ -302,18 +305,30 @@ document.addEventListener('DOMContentLoaded', () => {
             tableBody.appendChild(row);
         });
 
-        tableBody.querySelectorAll('.view-details-btn').forEach(btn => btn.addEventListener('click', (e) => showLoanDetails(e.target.dataset.loanId)));
-        tableBody.querySelectorAll('.approve-btn').forEach(btn => btn.addEventListener('click', (e) => openApproveModal(e.target.dataset.loanId)));
-        tableBody.querySelectorAll('.decline-btn').forEach(btn => btn.addEventListener('click', (e) => updateLoanStatus(e.target.dataset.loanId, 'reject')));
-        tableBody.querySelectorAll('.complete-btn').forEach(btn => btn.addEventListener('click', (e) => updateLoanStatus(e.target.dataset.loanId, 'complete')));
-        tableBody.querySelectorAll('.default-btn').forEach(btn => btn.addEventListener('click', (e) => updateLoanStatus(e.target.dataset.loanId, 'default')));
+        tableBody.querySelectorAll('.view-details-btn').forEach(btn =>
+            btn.addEventListener('click', (e) => showLoanDetails(e.target.dataset.loanId))
+        );
+        tableBody.querySelectorAll('.approve-btn').forEach(btn =>
+            btn.addEventListener('click', (e) => openApproveModal(e.target.dataset.loanId))
+        );
+        tableBody.querySelectorAll('.decline-btn').forEach(btn =>
+            btn.addEventListener('click', (e) => updateLoanStatus(e.target.dataset.loanId, 'reject'))
+        );
+        tableBody.querySelectorAll('.complete-btn').forEach(btn =>
+            btn.addEventListener('click', (e) => updateLoanStatus(e.target.dataset.loanId, 'complete'))
+        );
+        tableBody.querySelectorAll('.default-btn').forEach(btn =>
+            btn.addEventListener('click', (e) => updateLoanStatus(e.target.dataset.loanId, 'default'))
+        );
     };
 
     const updateLoanStatus = async (loanId, action) => {
         if (!confirm(`Are you sure you want to ${action} this loan?`)) {
             return;
         }
+
         const token = getAuthToken();
+
         if (!token) {
             alert('Authentication token is missing. Please log in again.');
             return;
@@ -326,8 +341,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Authorization': `Bearer ${token}`
                 }
             });
+
             if (response.ok) {
                 alert(`Loan ${loanId} has been ${action}d.`);
+
                 if (action === 'approve' || action === 'reject') {
                     fetchLoans('pending', approveLoansTableBody, 'approve');
                 } else {
@@ -344,21 +361,30 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ---
-    // APPROVE LOAN (with editable amount, interest rate, and duration)
+    // APPROVE LOAN (with editable amount, interest rate, duration, and monthly structure)
     // ---
     const openApproveModal = async (loanId) => {
         currentApproveLoanId = loanId;
 
-        // Reset to a loading state while we fetch the real current values
         approveNote.textContent = 'Loading current loan details…';
         approveAmountInput.value = '';
         approveInterestRateInput.value = '';
         approveDurationInput.value = '';
         approveConfirmBtn.disabled = true;
 
+        // Reset the repayment structure field while loading
+        currentApproveLoanTermType = '';
+        if (approveStructureField) {
+            approveStructureField.style.display = 'none';
+        }
+        if (approveStructureInput) {
+            approveStructureInput.value = '0';
+        }
+
         showModal(approveLoanModal);
 
         const token = getAuthToken();
+
         if (!token) {
             alert('Authentication token is missing. Please log in again.');
             hideModal(approveLoanModal);
@@ -369,6 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${API_BASE_URL}/Loan/details/${loanId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+
             const loan = await response.json();
 
             if (!response.ok) {
@@ -376,7 +403,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const termType = loan.termType || loan.TermType || '';
+            currentApproveLoanTermType = termType.toLowerCase();
+
             const limits = getDurationLimits(termType);
+
+            // Show the structure selection only for monthly loans
+            if (approveStructureField) {
+                approveStructureField.style.display =
+                    currentApproveLoanTermType === 'monthly' ? 'block' : 'none';
+            }
+
+            // Load the saved structure when available; otherwise default to Flat Rate (0)
+            if (approveStructureInput) {
+                const savedStructure =
+                    loan.monthlyRepaymentStructure ??
+                    loan.MonthlyRepaymentStructure ??
+                    0;
+
+                approveStructureInput.value = String(savedStructure);
+            }
 
             approveNote.innerHTML = `Applied for <strong>${formatCurrency(loan.principal, 'NGN')}</strong> at <strong>${loan.interestRate}%</strong> over <strong>${loan.durationValue} ${limits.label}</strong> (${termType}). Adjust any field below if needed.`;
 
@@ -407,16 +452,19 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Please enter a valid approved amount greater than zero.');
             return;
         }
+
         if (isNaN(rate) || rate < 0) {
             alert('Please enter a valid interest rate.');
             return;
         }
+
         if (isNaN(duration) || duration <= 0) {
             alert('Please enter a valid duration.');
             return;
         }
 
         const token = getAuthToken();
+
         if (!token) {
             alert('Authentication token is missing. Please log in again.');
             return;
@@ -425,6 +473,27 @@ document.addEventListener('DOMContentLoaded', () => {
         approveConfirmBtn.disabled = true;
         approveConfirmBtn.textContent = 'Approving...';
 
+        // Keep the existing request fields unchanged.
+        const approvalRequest = {
+            newPrincipal: amount,
+            newInterestRate: rate,
+            newDurationValue: duration
+        };
+
+        // Send the repayment structure only for monthly loans.
+        if (currentApproveLoanTermType === 'monthly' && approveStructureInput) {
+            const structure = parseInt(approveStructureInput.value, 10);
+
+            if (structure !== 0 && structure !== 1) {
+                alert('Please select a valid monthly repayment structure.');
+                approveConfirmBtn.disabled = false;
+                approveConfirmBtn.textContent = 'Confirm Approval';
+                return;
+            }
+
+            approvalRequest.monthlyRepaymentStructure = structure;
+        }
+
         try {
             const response = await fetch(`${API_BASE_URL}/Loan/approve/${currentApproveLoanId}`, {
                 method: 'POST',
@@ -432,11 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    newPrincipal: amount,
-                    newInterestRate: rate,
-                    newDurationValue: duration
-                })
+                body: JSON.stringify(approvalRequest)
             });
 
             const result = await response.json();
@@ -463,20 +528,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const showLoanDetails = async (loanId) => {
         const token = getAuthToken();
+
         if (!token) {
             alert('Authentication token is missing. Please log in again.');
             return;
         }
+
         try {
             const response = await fetch(`${API_BASE_URL}/Loan/details/${loanId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
+
             const loan = await response.json();
+
             if (response.ok) {
                 const modalContent = loanDetailsModal.querySelector('.modal-content');
-                
+
                 modalContent.innerHTML = `
                     <span class="close-button" onclick="hideModal(document.getElementById('loanDetailsModal'))">&times;</span>
                     <h3>Loan Details</h3>
@@ -494,6 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p><strong>Total Repayment:</strong> ${formatCurrency(loan.totalRepayment, 'NGN') || 'N/A'}</p>
                     <p><strong>Installment Amount:</strong> ${formatCurrency(loan.installmentAmount, 'NGN') || 'N/A'}</p>
                 `;
+
                 showModal(loanDetailsModal);
             } else {
                 alert('Loan not found.');
@@ -504,8 +574,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    if (modalCloseBtn) modalCloseBtn.addEventListener('click', () => hideModal(loanDetailsModal));
-    if (successCloseBtn) successCloseBtn.addEventListener('click', () => hideModal(successMessageModal));
+    if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', () => hideModal(loanDetailsModal));
+    }
+
+    if (successCloseBtn) {
+        successCloseBtn.addEventListener('click', () => hideModal(successMessageModal));
+    }
+
     window.addEventListener('click', (e) => {
         if (e.target === loanDetailsModal) hideModal(loanDetailsModal);
         if (e.target === successMessageModal) hideModal(successMessageModal);

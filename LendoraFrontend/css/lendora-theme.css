@@ -1,0 +1,111 @@
+/* Lendora visual refresh — presentation only; existing page logic is untouched. */
+:root {
+  --lendora-ink: #172b42;
+  --lendora-navy: #10243a;
+  --lendora-teal: #0d9488;
+  --lendora-teal-dark: #087f75;
+  --lendora-gold: #f5b84b;
+  --lendora-bg: #f3f6fa;
+  --lendora-surface: #ffffff;
+  --lendora-muted: #66778a;
+  --lendora-border: #e2e9f0;
+  --lendora-shadow: 0 12px 32px rgba(16, 36, 58, .08);
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: Inter, 'Segoe UI', Arial, sans-serif !important; }
+body:has(.sidebar) { background: var(--lendora-bg) !important; color: var(--lendora-ink) !important; }
+.sidebar {
+  background: var(--lendora-navy) !important;
+  color: #eef6fb !important;
+  box-shadow: 8px 0 28px rgba(16, 36, 58, .10) !important;
+  border-right: 1px solid rgba(255,255,255,.07);
+}
+.sidebar h2, .sidebar .logo-title h2 { color: #ffffff !important; letter-spacing: .08em; }
+.sidebar a, .sidebar .menu a, .sidebar li a {
+  border-radius: 10px;
+  transition: background .18s ease, color .18s ease, transform .18s ease;
+}
+.sidebar a:hover, .sidebar .menu a:hover, .sidebar li a:hover,
+.sidebar a.active, .sidebar .menu a.active, .sidebar li.active a {
+  background: rgba(13,148,136,.20) !important;
+  color: #7ce6d9 !important;
+}
+.logo { border-radius: 16px !important; box-shadow: none !important; object-fit: contain; }
+body:has(.sidebar) .container { color: var(--lendora-ink); }
+body:has(.sidebar) .container h1,
+body:has(.sidebar) .container h2,
+body:has(.sidebar) .container h3 { color: var(--lendora-ink); }
+.card, .dashboard-card, .stat-card, .table-container, .content-card, .form-container,
+.modal-content, .analytics-card, .chart-container {
+  border: 1px solid var(--lendora-border) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--lendora-shadow) !important;
+}
+body:has(.sidebar) .card, body:has(.sidebar) .dashboard-card,
+body:has(.sidebar) .stat-card, body:has(.sidebar) .table-container,
+body:has(.sidebar) .content-card, body:has(.sidebar) .form-container,
+body:has(.sidebar) .chart-container { background: var(--lendora-surface) !important; }
+button, input[type="submit"], .btn, .button, .primary-btn {
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+button:hover, input[type="submit"]:hover, .btn:hover, .button:hover, .primary-btn:hover {
+  filter: brightness(.97);
+  box-shadow: 0 7px 18px rgba(13,148,136,.15);
+}
+body:has(.sidebar) button, body:has(.sidebar) input[type="submit"],
+body:has(.sidebar) .btn-primary, body:has(.sidebar) .primary-btn {
+  background: var(--lendora-teal) !important;
+  border-color: var(--lendora-teal) !important;
+  color: #fff !important;
+}
+input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+  border: 1px solid #d6e0e9 !important;
+  border-radius: 10px !important;
+  background-color: #fff;
+  color: var(--lendora-ink);
+  min-height: 42px;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--lendora-teal) !important;
+  box-shadow: 0 0 0 3px rgba(13,148,136,.12) !important;
+}
+table { border-collapse: separate; border-spacing: 0; }
+thead th { background: #edf3f7 !important; color: #40566c !important; font-weight: 700; }
+th, td { border-color: var(--lendora-border) !important; }
+tbody tr:hover { background: #f5fafb; }
+.badge, .status, .status-badge { border-radius: 999px; }
+#loadingOverlay, .rolling-load { background: rgba(16,36,58,.96) !important; }
+.spinner, .rolling-load-spinner { border-top-color: var(--lendora-teal) !important; }
+
+/* Staff sign-in */
+body:not(:has(.sidebar)) .container {
+  border-radius: 22px !important;
+  box-shadow: 0 24px 70px rgba(16,36,58,.18) !important;
+}
+.left-panel { background: var(--lendora-navy) !important; }
+.branding h2 { color: #fff; }
+.right-panel { background: #fff; }
+.login-box h2 { color: var(--lendora-ink); }
+body:not(:has(.sidebar)) button[type="submit"] { background: var(--lendora-teal) !important; }
+
+/* Public application page */
+.hero-logo, .apply-logo { object-fit: contain; }
+.hero-cta, .apply-container button, .apply-container input[type="submit"] {
+  background: var(--lendora-teal) !important;
+  border-color: var(--lendora-teal) !important;
+}
+
+
+/* Dashboard visibility fix: original card colors included white text, but the Lendora theme makes the card surfaces white. */
+.dashboard-cards .card,
+.dashboard-cards .card h3,
+.dashboard-cards .card p,
+.dashboard-cards .card span,
+.dashboard-cards .card .dual-value-label {
+  color: var(--lendora-ink) !important;
+}
+.dashboard-cards .card p { font-variant-numeric: tabular-nums; }

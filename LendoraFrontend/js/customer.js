@@ -1,0 +1,577 @@
+// customer.js
+document.addEventListener("DOMContentLoaded", () => {
+    const addCustomerBtn = document.getElementById("addCustomerBtn");
+    const customerFormContainer = document.getElementById("customerFormContainer");
+    const customerForm = document.getElementById("customerForm");
+    const editModal = document.getElementById("editModal");
+    const editForm = document.getElementById("editForm");
+    const customerListBody = document.getElementById("customer-list-body");
+    const cancelButtons = document.querySelectorAll(".cancel-form, .cancel-button, #cancelEditBtn");
+    const searchBar = document.getElementById("searchBar");
+    const viewCustomerModal = document.getElementById("viewCustomerModal");
+    const closeViewCustomerModalBtn = document.getElementById("closeViewCustomerModalBtn");
+    const exportPdfBtn = document.getElementById("exportPdfBtn");
+
+    let currentEditId = null;
+    let customersCache = [];
+
+    // ==================== PAGINATION ====================
+    let currentPage = 1;
+    const pageSize = 10;
+    let totalCustomers = 0;
+    let currentSearchTerm = "";
+
+    // Show Add Customer Modal
+    addCustomerBtn?.addEventListener("click", () => {
+        customerFormContainer.classList.remove("hidden");
+        customerFormContainer.classList.add("visible");
+    });
+
+    // Close modals
+    cancelButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            customerFormContainer.classList.remove("visible");
+            customerFormContainer.classList.add("hidden");
+            editModal.classList.remove("visible");
+            editModal.classList.add("hidden");
+        });
+    });
+
+    // Close View Customer Modal
+    closeViewCustomerModalBtn?.addEventListener("click", () => {
+        viewCustomerModal.classList.remove("visible");
+        viewCustomerModal.classList.add("hidden");
+    });
+
+    // ==================== FETCH CUSTOMERS ====================
+    async function fetchCustomers(page = 1, searchTerm = "") {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            customerListBody.innerHTML = `<tr><td colspan="5">Please log in to view customers.</td></tr>`;
+            return;
+        }
+
+        try {
+            const params = new URLSearchParams({
+                pageNumber: page,
+                pageSize: pageSize
+            });
+
+            if (searchTerm.trim() !== "") {
+                params.append("searchTerm", searchTerm.trim());
+            }
+
+            const response = await fetch(
+                `${API_BASE_URL}/Customer/list?${params.toString()}`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (!response.ok) throw new Error("Failed to fetch customers");
+
+            const data = await response.json();
+
+            customersCache = data.customers || [];
+            totalCustomers = data.totalCount || 0;
+            currentPage = data.pageNumber || page;
+
+            populateCustomerTable(customersCache);
+            renderPagination();
+
+        } catch (err) {
+            console.error("Error fetching customers:", err);
+            customerListBody.innerHTML = `<tr><td colspan="5">Error loading customers</td></tr>`;
+        }
+    }
+
+    function populateCustomerTable(customers) {
+        if (!customers.length) {
+            customerListBody.innerHTML = `<tr><td colspan="5" class="text-center">No customers found</td></tr>`;
+            return;
+        }
+
+        customerListBody.innerHTML = "";
+
+        customers.forEach((c, idx) => {
+            const tr = document.createElement("tr");
+
+            // Keep numbering continuous across pages
+            const rowNumber = ((currentPage - 1) * pageSize) + idx + 1;
+
+            tr.innerHTML = `
+                <td>${rowNumber}</td>
+                <td>${c.id}</td>
+                <td>${c.fullName}</td>
+                <td>${c.phoneNumber}</td>
+                <td>
+                    <button class="view-btn" data-id="${c.id}">View</button>
+                    <button class="edit-btn" data-id="${c.id}">Edit</button>
+                    <button class="delete-btn" data-id="${c.id}">Delete</button>
+                </td>
+            `;
+
+            customerListBody.appendChild(tr);
+        });
+
+        document.querySelectorAll(".view-btn").forEach(btn =>
+            btn.addEventListener("click", e =>
+                viewCustomer(e.target.dataset.id)
+            )
+        );
+
+        document.querySelectorAll(".edit-btn").forEach(btn =>
+            btn.addEventListener("click", e =>
+                editCustomer(e.target.dataset.id)
+            )
+        );
+
+        document.querySelectorAll(".delete-btn").forEach(btn =>
+            btn.addEventListener("click", e =>
+                deleteCustomer(e.target.dataset.id)
+            )
+        );
+    }
+
+    // ==================== PAGINATION CONTROLS ====================
+    function renderPagination() {
+        let paginationContainer = document.getElementById("customer-pagination");
+
+        // Create pagination container if it does not already exist
+        if (!paginationContainer) {
+            paginationContainer = document.createElement("div");
+            paginationContainer.id = "customer-pagination";
+
+            paginationContainer.style.display = "flex";
+            paginationContainer.style.justifyContent = "center";
+            paginationContainer.style.alignItems = "center";
+            paginationContainer.style.gap = "6px";
+            paginationContainer.style.marginTop = "20px";
+            paginationContainer.style.flexWrap = "wrap";
+
+            customerListBody.closest("table")?.parentElement?.appendChild(
+                paginationContainer
+            );
+        }
+
+        paginationContainer.innerHTML = "";
+
+        const totalPages = Math.ceil(totalCustomers / pageSize);
+
+        if (totalPages <= 1) {
+            const info = document.createElement("span");
+
+            info.textContent =
+                `Showing ${totalCustomers} customer${totalCustomers === 1 ? "" : "s"}`;
+
+            paginationContainer.appendChild(info);
+            return;
+        }
+
+        // Customer count information
+        const start = ((currentPage - 1) * pageSize) + 1;
+        const end = Math.min(currentPage * pageSize, totalCustomers);
+
+        const info = document.createElement("span");
+
+        info.textContent =
+            `Showing ${start}-${end} of ${totalCustomers} customers`;
+
+        info.style.marginRight = "10px";
+
+        paginationContainer.appendChild(info);
+
+        // Previous button
+        const previousBtn = document.createElement("button");
+
+        previousBtn.textContent = "Previous";
+        previousBtn.disabled = currentPage === 1;
+
+        previousBtn.addEventListener("click", () => {
+            if (currentPage > 1) {
+                fetchCustomers(currentPage - 1, currentSearchTerm);
+            }
+        });
+
+        paginationContainer.appendChild(previousBtn);
+
+        // Page numbers
+        for (let page = 1; page <= totalPages; page++) {
+            const pageBtn = document.createElement("button");
+
+            pageBtn.textContent = page;
+
+            if (page === currentPage) {
+                pageBtn.disabled = true;
+            }
+
+            pageBtn.addEventListener("click", () => {
+                fetchCustomers(page, currentSearchTerm);
+            });
+
+            paginationContainer.appendChild(pageBtn);
+        }
+
+        // Next button
+        const nextBtn = document.createElement("button");
+
+        nextBtn.textContent = "Next";
+        nextBtn.disabled = currentPage === totalPages;
+
+        nextBtn.addEventListener("click", () => {
+            if (currentPage < totalPages) {
+                fetchCustomers(currentPage + 1, currentSearchTerm);
+            }
+        });
+
+        paginationContainer.appendChild(nextBtn);
+    }
+
+    // ==================== SEARCH ====================
+    let searchTimeout;
+
+    searchBar?.addEventListener("input", () => {
+        clearTimeout(searchTimeout);
+
+        searchTimeout = setTimeout(() => {
+            currentSearchTerm = searchBar.value.trim();
+            currentPage = 1;
+
+            fetchCustomers(1, currentSearchTerm);
+        }, 300);
+    });
+
+    // ==================== ADD CUSTOMER ====================
+    customerForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const token = localStorage.getItem("token");
+
+        if (!token) return alert("Please log in.");
+
+        const jsonData = {
+            fullName: customerForm.fullName.value,
+            dateOfBirth: customerForm.dateOfBirth.value,
+            gender: customerForm.gender.value,
+            maritalStatus: customerForm.maritalStatus.value,
+            residentialAddress: customerForm.residentialAddress.value,
+            email: customerForm.email.value,
+            phoneNumber: customerForm.phoneNumber.value,
+            employmentStatus: customerForm.employmentStatus.value,
+            monthlyIncome: parseFloat(customerForm.monthlyIncome.value) || 0,
+            idType: customerForm.idType.value,
+            idNumber: customerForm.idNumber.value,
+            nin: customerForm.nin.value,
+            bvn: customerForm.bvn.value,
+            guarantor: {
+                fullName: customerForm.guarantorFullName.value,
+                relationshipToBorrower: customerForm.guarantorRelationship.value,
+                residentialAddress: customerForm.guarantorAddress.value,
+                phoneNumber: customerForm.guarantorPhone.value,
+                email: customerForm.guarantorEmail.value
+            }
+        };
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/Customer/create`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(jsonData)
+            });
+
+            if (!response.ok) throw new Error("Failed to add customer");
+
+            alert("Customer added successfully");
+
+            customerForm.reset();
+
+            customerFormContainer.classList.remove("visible");
+            customerFormContainer.classList.add("hidden");
+
+            fetchCustomers(currentPage, currentSearchTerm);
+
+        } catch (err) {
+            console.error(err);
+            alert("Error adding customer");
+        }
+    });
+
+    // ==================== VIEW CUSTOMER ====================
+    async function viewCustomer(id) {
+        const token = localStorage.getItem("token");
+
+        if (!token) return alert("Please log in.");
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/Customer/${id}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch customer");
+
+            const customer = await response.json();
+
+            // Populate the modal with the fresh data
+            document.getElementById("viewCustomerId").textContent = customer.id;
+            document.getElementById("viewFullName").textContent = customer.fullName;
+            document.getElementById("viewDob").textContent =
+                new Date(customer.dateOfBirth).toLocaleDateString();
+            document.getElementById("viewGender").textContent = customer.gender;
+            document.getElementById("viewMaritalStatus").textContent = customer.maritalStatus;
+            document.getElementById("viewResidentialAddress").textContent = customer.residentialAddress;
+            document.getElementById("viewEmail").textContent = customer.email;
+            document.getElementById("viewPhone").textContent = customer.phoneNumber;
+            document.getElementById("viewEmploymentStatus").textContent = customer.employmentStatus;
+            document.getElementById("viewIncome").textContent = customer.monthlyIncome;
+            document.getElementById("viewIdType").textContent = customer.idType;
+            document.getElementById("viewIdNumber").textContent = customer.idNumber;
+            document.getElementById("viewNin").textContent = customer.nin;
+            document.getElementById("viewBvn").textContent = customer.bvn;
+            document.getElementById("viewGuarantorFullName").textContent = customer.guarantorFullName;
+            document.getElementById("viewRelationshipToBorrower").textContent = customer.guarantorRelationship;
+            document.getElementById("viewGuarantorResidentialAddress").textContent = customer.guarantorAddress;
+            document.getElementById("viewGuarantorPhone").textContent = customer.guarantorPhone;
+            document.getElementById("viewGuarantorEmail").textContent = customer.guarantorEmail;
+            document.getElementById("viewGuarantorIdType").textContent = customer.guarantorIdType;
+            document.getElementById("viewGuarantorIdNumber").textContent = customer.guarantorIdNumber;
+
+            document.getElementById("viewIdPhoto").src =
+                customer.idPhotoUrl ||
+                'https://placehold.co/400x300/e0e0e0/555?text=ID+Photo+Not+Found';
+
+            document.getElementById("viewPassportPhoto").src =
+                customer.passportPhotoUrl ||
+                'https://placehold.co/400x300/e0e0e0/555?text=Passport+Photo+Not+Found';
+
+            // Store the full customer object directly on the button for later use
+            if (exportPdfBtn) exportPdfBtn.customerData = customer;
+
+            viewCustomerModal.classList.remove("hidden");
+            viewCustomerModal.classList.add("visible");
+
+        } catch (err) {
+            console.error(err);
+            alert("Error fetching customer");
+        }
+    }
+
+    // ==================== EXPORT PDF ====================
+    async function exportToPdf() {
+        const customer = exportPdfBtn.customerData;
+
+        if (!customer) {
+            return console.error('Customer data not found for PDF export.');
+        }
+
+        // The modal must be visible for html2canvas to capture it
+        viewCustomerModal.classList.remove('hidden');
+        viewCustomerModal.classList.add('visible');
+
+        // Wait a short duration to ensure the modal content is fully rendered
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const content = document.getElementById('customerDetailsContent');
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+
+        await html2canvas(content, { scale: 2 }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 210;
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+
+            heightLeft -= 297;
+
+            while (heightLeft > 0) {
+                position = heightLeft - imgHeight;
+
+                doc.addPage();
+
+                doc.addImage(
+                    imgData,
+                    'PNG',
+                    0,
+                    position,
+                    imgWidth,
+                    imgHeight
+                );
+
+                heightLeft -= 297;
+            }
+
+            doc.save(`${customer.fullName}_details.pdf`);
+        });
+
+        // Hide the modal again after export is complete
+        viewCustomerModal.classList.add("hidden");
+        viewCustomerModal.classList.remove("visible");
+    }
+
+    // ==================== EDIT CUSTOMER ====================
+    async function editCustomer(id) {
+        currentEditId = id;
+
+        const token = localStorage.getItem("token");
+
+        if (!token) return alert("Please log in.");
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/Customer/${id}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch customer");
+
+            const c = await response.json();
+
+            // Populate form
+            editForm.editFullName.value = c.fullName;
+            editForm.editDateOfBirth.value = c.dateOfBirth.split("T")[0];
+            editForm.editGender.value = c.gender;
+            editForm.editMaritalStatus.value = c.maritalStatus;
+            editForm.editResidentialAddress.value = c.residentialAddress;
+            editForm.editEmail.value = c.email;
+            editForm.editPhoneNumber.value = c.phoneNumber;
+            editForm.editEmploymentStatus.value = c.employmentStatus;
+            editForm.editMonthlyIncome.value = c.monthlyIncome;
+            editForm.editIdType.value = c.idType;
+            editForm.editIdNumber.value = c.idNumber;
+            editForm.editNin.value = c.nin;
+            editForm.editBvn.value = c.bvn;
+            editForm.editGuarantorFullName.value = c.guarantorFullName;
+            editForm.editGuarantorRelationship.value = c.guarantorRelationship;
+            editForm.editGuarantorAddress.value = c.guarantorAddress;
+            editForm.editGuarantorPhone.value = c.guarantorPhone;
+            editForm.editGuarantorEmail.value = c.guarantorEmail;
+            editForm.editGuarantorIdType.value = c.guarantorIdType;
+            editForm.editGuarantorIdNumber.value = c.guarantorIdNumber;
+
+            editModal.classList.remove("hidden");
+            editModal.classList.add("visible");
+
+        } catch (err) {
+            console.error(err);
+            alert("Error loading customer data");
+        }
+    }
+
+    editForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (!currentEditId) return;
+
+        const token = localStorage.getItem("token");
+
+        if (!token) return alert("Please log in.");
+
+        const jsonData = {
+            id: currentEditId,
+            fullName: editForm.editFullName.value,
+            dateOfBirth: editForm.editDateOfBirth.value,
+            gender: editForm.editGender.value,
+            maritalStatus: editForm.editMaritalStatus.value,
+            residentialAddress: editForm.editResidentialAddress.value,
+            email: editForm.editEmail.value,
+            phoneNumber: editForm.editPhoneNumber.value,
+            employmentStatus: editForm.editEmploymentStatus.value,
+            monthlyIncome: parseFloat(editForm.editMonthlyIncome.value) || null,
+            idType: editForm.editIdType.value,
+            idNumber: editForm.editIdNumber.value,
+            nin: editForm.editNin.value,
+            bvn: editForm.editBvn.value,
+            guarantor: {
+                fullName: editForm.editGuarantorFullName.value,
+                relationshipToBorrower: editForm.editGuarantorRelationship.value,
+                residentialAddress: editForm.editGuarantorAddress.value,
+                phoneNumber: editForm.editGuarantorPhone.value,
+                email: editForm.editGuarantorEmail.value,
+                idType: editForm.editGuarantorIdType.value,
+                idNumber: editForm.editGuarantorIdNumber.value
+            }
+        };
+
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/Customer/update/${currentEditId}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(jsonData)
+                }
+            );
+
+            if (!response.ok) throw new Error("Failed to update customer");
+
+            alert("Customer updated successfully");
+
+            editModal.classList.remove("visible");
+            editModal.classList.add("hidden");
+
+            fetchCustomers(currentPage, currentSearchTerm);
+
+        } catch (err) {
+            console.error(err);
+            alert("Error updating customer");
+        }
+    });
+
+    // ==================== DELETE CUSTOMER ====================
+    async function deleteCustomer(id) {
+        if (!confirm("Are you sure you want to delete this customer?")) return;
+
+        const token = localStorage.getItem("token");
+
+        if (!token) return alert("Please log in.");
+
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/Customer/delete/${id}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (!response.ok) throw new Error("Failed to delete customer");
+
+            alert("Customer deleted successfully");
+
+            fetchCustomers(currentPage, currentSearchTerm);
+
+        } catch (err) {
+            console.error(err);
+            alert("Error deleting customer");
+        }
+    }
+
+    // ==================== EXPORT PDF BUTTON ====================
+    exportPdfBtn?.addEventListener("click", () => {
+        exportToPdf();
+    });
+
+    // ==================== INITIAL LOAD ====================
+    fetchCustomers(1, "");
+});

@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Capital Position | First Lend</title>
+
+    <title>Capital Position | Lendora</title>
 
     <link rel="stylesheet" href="css/capital-position.css">
 
@@ -13,35 +14,85 @@
 </head>
 <body>
 
-    <div class="sidebar">
+    <!-- MOBILE MENU BUTTON -->
+    <button
+        class="menu-toggle"
+        id="menuToggle"
+        type="button"
+        aria-label="Open navigation"
+        aria-expanded="false">
+        ☰
+    </button>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+
         <div class="logo-title">
-            <img src="images/firstlend.png" alt="Logo" class="logo">
+            <img src="images/" alt="Lendora Logo" class="logo">
             <h2>LENDORA</h2>
         </div>
 
         <ul class="menu">
-            <li><a href="dashboard.html">🏠 Home</a></li>
-            <li><a href="customer.html">👥 Manage Customers</a></li>
-            <li><a href="loan.html">💰 Manage Loans</a></li>
-            <li><a href="loan-repayments.html">💳 Loan Repayments</a></li>
-            <li><a href="payment.html">💵 Payments</a></li>
-            <li><a href="expense.html">📊 Expense</a></li>
-            <li><a href="notification.html">🔔 Notifications</a></li>
-            <li><a href="users.html">⚙️ Control Panel</a></li>
-            <li><a href="analysis.html">📊 Profit Analytics</a></li>
+            <li>
+                <a href="dashboard.html">🏠 Home</a>
+            </li>
+
+            <li>
+                <a href="customer.html">👥 Manage Customers</a>
+            </li>
+
+            <li>
+                <a href="loan.html">💰 Manage Loans</a>
+            </li>
+
+            <li>
+                <a href="loan-repayments.html">💳 Loan Repayments</a>
+            </li>
+
+            <li>
+                <a href="payment.html">💵 Payments</a>
+            </li>
+
+            <li>
+                <a href="expense.html">📊 Expense</a>
+            </li>
+
+            <li>
+                <a href="notification.html">🔔 Notifications</a>
+            </li>
+
+            <li>
+                <a href="users.html">⚙️ Control Panel</a>
+            </li>
+
+            <li>
+                <a href="analysis.html">📊 Profit Analytics</a>
+            </li>
+
             <li class="active">
                 <a href="capital-position.html">🏦 Capital Position</a>
             </li>
-            <li><a href="index.html" id="logout">🚪 Logout</a></li>
+
+            <li>
+                <a href="index.html" id="logout">🚪 Logout</a>
+            </li>
         </ul>
+
     </div>
 
+    <!-- MOBILE SIDEBAR OVERLAY -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- MAIN CONTENT -->
     <main class="main-content">
 
         <header class="page-header">
             <div>
                 <h1>Capital Position</h1>
-                <p>See how much capital is currently running in loans and how much remains available.</p>
+                <p>
+                    See how much capital is currently running in loans
+                    and how much remains available.
+                </p>
             </div>
         </header>
 
@@ -118,6 +169,7 @@
         <!-- CAPITAL MANAGEMENT -->
         <section class="capital-management">
 
+            <!-- OPENING CAPITAL -->
             <div class="management-card">
 
                 <h2>Set Opening Capital</h2>
@@ -163,12 +215,14 @@
 
             </div>
 
+            <!-- ADDITIONAL CAPITAL -->
             <div class="management-card">
 
                 <h2>Add New Capital</h2>
 
                 <p>
-                    Record fresh money introduced into the business after the initial capital.
+                    Record fresh money introduced into the business after
+                    the initial capital.
                 </p>
 
                 <form id="contributionForm">
@@ -210,8 +264,10 @@
 
         </section>
 
+        <!-- ALERT MESSAGES -->
         <div id="customAlertContainer"></div>
 
+        <!-- LOADING INDICATOR -->
         <div id="loadingIndicator" class="loading-indicator">
             Loading capital position...
         </div>

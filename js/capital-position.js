@@ -8,8 +8,61 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingIndicator = document.getElementById('loadingIndicator');
     const logoutBtn = document.getElementById('logout');
 
-    // Local date helper
+    // MOBILE SIDEBAR CONTROLS
+    const sidebar = document.querySelector('.sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    const closeSidebar = () => {
+        if (sidebar) {
+            sidebar.classList.remove('open');
+        }
+
+        if (sidebarOverlay) {
+            sidebarOverlay.classList.remove('visible');
+        }
+
+        if (menuToggle) {
+            menuToggle.setAttribute('aria-expanded', 'false');
+            menuToggle.setAttribute('aria-label', 'Open navigation');
+        }
+    };
+
+    if (menuToggle && sidebar && sidebarOverlay) {
+
+        menuToggle.addEventListener('click', () => {
+
+            const isOpen = sidebar.classList.toggle('open');
+
+            sidebarOverlay.classList.toggle('visible', isOpen);
+
+            menuToggle.setAttribute('aria-expanded', String(isOpen));
+
+            menuToggle.setAttribute(
+                'aria-label',
+                isOpen ? 'Close navigation' : 'Open navigation'
+            );
+        });
+
+        // Close sidebar when overlay is clicked
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+        // Close sidebar when a navigation link is selected
+        sidebar.querySelectorAll('.menu a').forEach(link => {
+            link.addEventListener('click', closeSidebar);
+        });
+
+        // Close sidebar using Escape key
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') {
+                closeSidebar();
+            }
+        });
+    }
+
+    // LOCAL DATE HELPER
     const getToday = () => {
+
         const today = new Date();
 
         const year = today.getFullYear();
@@ -22,10 +75,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set default dates for capital forms
     const today = getToday();
 
-    document.getElementById('openingEffectiveDate').value = today;
-    document.getElementById('contributionDate').value = today;
+    const openingEffectiveDate =
+        document.getElementById('openingEffectiveDate');
 
-    // Authentication
+    const contributionDateInput =
+        document.getElementById('contributionDate');
+
+    if (openingEffectiveDate) {
+        openingEffectiveDate.value = today;
+    }
+
+    if (contributionDateInput) {
+        contributionDateInput.value = today;
+    }
+
+    // AUTHENTICATION
     const getToken = () => localStorage.getItem('token');
 
     const token = getToken();
@@ -35,59 +99,80 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Money formatting
+    // MONEY FORMATTING
     const formatMoney = (value) => {
+
         return `₦${Number(value || 0).toLocaleString('en-NG', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         })}`;
     };
 
-    // Custom alerts
+    // CUSTOM ALERTS
     const showCustomAlert = (message, type) => {
 
-        const container = document.getElementById('customAlertContainer');
+        const container =
+            document.getElementById('customAlertContainer');
 
         if (!container) return;
 
         const alert = document.createElement('div');
+
         alert.className = `custom-alert custom-alert-${type}`;
 
         const messageElement = document.createElement('span');
+
         messageElement.className = 'alert-message';
         messageElement.textContent = message;
 
         const closeButton = document.createElement('span');
+
         closeButton.className = 'close-btn';
         closeButton.textContent = '×';
 
-        closeButton.addEventListener('click', () => alert.remove());
+        closeButton.addEventListener('click', () => {
+            alert.remove();
+        });
 
         alert.appendChild(messageElement);
         alert.appendChild(closeButton);
 
         container.appendChild(alert);
 
-        setTimeout(() => alert.classList.add('fade-out'), 4500);
-        setTimeout(() => alert.remove(), 5000);
+        setTimeout(() => {
+            alert.classList.add('fade-out');
+        }, 4500);
+
+        setTimeout(() => {
+            alert.remove();
+        }, 5000);
     };
 
-    // API request helper
+    // API REQUEST HELPER
     const apiRequest = async (url, options = {}) => {
 
         const currentToken = getToken();
 
         if (!currentToken) {
+
             window.location.href = 'index.html';
-            throw new Error('Your session has expired. Please log in again.');
+
+            throw new Error(
+                'Your session has expired. Please log in again.'
+            );
         }
 
         const response = await fetch(url, {
             ...options,
+
             headers: {
                 'Authorization': `Bearer ${currentToken}`,
                 'Accept': 'application/json',
-                ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+
+                ...(options.body
+                    ? { 'Content-Type': 'application/json' }
+                    : {}),
+
                 ...options.headers
             }
         });
@@ -99,14 +184,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             window.location.href = 'index.html';
 
-            throw new Error('Your session has expired. Please log in again.');
+            throw new Error(
+                'Your session has expired. Please log in again.'
+            );
         }
 
         if (!response.ok) {
 
             const errorText = await response.text();
 
-            let errorMessage = errorText || response.statusText;
+            let errorMessage =
+                errorText || response.statusText;
 
             try {
 
@@ -131,10 +219,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const responseText = await response.text();
 
-        return responseText ? JSON.parse(responseText) : null;
+        return responseText
+            ? JSON.parse(responseText)
+            : null;
     };
 
-    // Render capital position
+    // RENDER CAPITAL POSITION
     const renderCapitalPosition = (data) => {
 
         document.getElementById('outstandingPrincipal').textContent =
@@ -161,9 +251,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('totalExpenses').textContent =
             formatMoney(data.totalExpenses);
 
-        // Expense details
+        // EXPENSE DETAILS
         const expenseContainer =
             document.getElementById('expenseDetails');
+
+        if (!expenseContainer) return;
 
         expenseContainer.innerHTML = '';
 
@@ -175,6 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data.expenseDetails.forEach(expense => {
 
                 const item = document.createElement('div');
+
                 item.className = 'detail-item';
 
                 const date = document.createElement('span');
@@ -184,6 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     : 'Expense date unavailable';
 
                 const amount = document.createElement('strong');
+
                 amount.textContent = formatMoney(expense.amount);
 
                 item.appendChild(date);
@@ -194,30 +288,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } else {
 
-            expenseContainer.textContent = 'No expenses recorded.';
+            expenseContainer.textContent =
+                'No expenses recorded.';
         }
     };
 
-    // Fetch current capital position
+    // FETCH CURRENT CAPITAL POSITION
     const fetchCapitalPosition = async () => {
 
-        loadingIndicator.style.display = 'block';
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'block';
+        }
 
         try {
 
-            const endpoint = `${API_BASE_URL}/Loan/capital-position`;
+            const endpoint =
+                `${API_BASE_URL}/Loan/capital-position`;
 
             const data = await apiRequest(endpoint);
 
             if (!data) {
-                throw new Error('No capital position data was returned.');
+                throw new Error(
+                    'No capital position data was returned.'
+                );
             }
 
             renderCapitalPosition(data);
 
         } catch (error) {
 
-            console.error('Failed to load capital position:', error);
+            console.error(
+                'Failed to load capital position:',
+                error
+            );
 
             showCustomAlert(
                 error.message || 'Failed to load capital position.',
@@ -226,149 +329,173 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } finally {
 
-            loadingIndicator.style.display = 'none';
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
+            }
         }
     };
 
-    // Set opening capital
-    openingCapitalForm.addEventListener('submit', async (event) => {
+    // SET OPENING CAPITAL
+    if (openingCapitalForm) {
 
-        event.preventDefault();
+        openingCapitalForm.addEventListener('submit', async (event) => {
 
-        const amount = Number(
-            document.getElementById('openingAmount').value
-        );
+            event.preventDefault();
 
-        const description =
-            document.getElementById('openingDescription').value.trim();
-
-        const effectiveDate =
-            document.getElementById('openingEffectiveDate').value;
-
-        if (amount <= 0 || !description || !effectiveDate) {
-
-            showCustomAlert(
-                'Please provide a valid amount, description and effective date.',
-                'error'
+            const amount = Number(
+                document.getElementById('openingAmount').value
             );
 
-            return;
-        }
+            const description =
+                document.getElementById('openingDescription').value.trim();
 
-        const submitButton =
-            document.getElementById('saveOpeningCapital');
+            const effectiveDate =
+                document.getElementById('openingEffectiveDate').value;
 
-        submitButton.disabled = true;
-        submitButton.textContent = 'Saving...';
+            if (amount <= 0 || !description || !effectiveDate) {
 
-        try {
+                showCustomAlert(
+                    'Please provide a valid amount, description and effective date.',
+                    'error'
+                );
 
-            await apiRequest(`${API_BASE_URL}/Loan/opening-capital`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    amount,
-                    description,
-                    effectiveDate
-                })
-            });
+                return;
+            }
 
-            showCustomAlert(
-                'Opening capital saved successfully.',
-                'success'
+            const submitButton =
+                document.getElementById('saveOpeningCapital');
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Saving...';
+
+            try {
+
+                await apiRequest(
+                    `${API_BASE_URL}/Loan/opening-capital`,
+                    {
+                        method: 'POST',
+
+                        body: JSON.stringify({
+                            amount,
+                            description,
+                            effectiveDate
+                        })
+                    }
+                );
+
+                showCustomAlert(
+                    'Opening capital saved successfully.',
+                    'success'
+                );
+
+                openingCapitalForm.reset();
+
+                document.getElementById('openingEffectiveDate').value =
+                    getToday();
+
+                await fetchCapitalPosition();
+
+            } catch (error) {
+
+                console.error(
+                    'Failed to save opening capital:',
+                    error
+                );
+
+                showCustomAlert(
+                    error.message || 'Failed to save opening capital.',
+                    'error'
+                );
+
+            } finally {
+
+                submitButton.disabled = false;
+                submitButton.textContent = 'Save Opening Capital';
+            }
+        });
+    }
+
+    // ADD FRESH CAPITAL CONTRIBUTION
+    if (contributionForm) {
+
+        contributionForm.addEventListener('submit', async (event) => {
+
+            event.preventDefault();
+
+            const amount = Number(
+                document.getElementById('contributionAmount').value
             );
 
-            openingCapitalForm.reset();
+            const description =
+                document.getElementById('contributionDescription').value.trim();
 
-            document.getElementById('openingEffectiveDate').value = getToday();
+            const contributionDate =
+                document.getElementById('contributionDate').value;
 
-            await fetchCapitalPosition();
+            if (amount <= 0 || !description || !contributionDate) {
 
-        } catch (error) {
+                showCustomAlert(
+                    'Please provide a valid amount, description and contribution date.',
+                    'error'
+                );
 
-            console.error('Failed to save opening capital:', error);
+                return;
+            }
 
-            showCustomAlert(
-                error.message || 'Failed to save opening capital.',
-                'error'
-            );
+            const submitButton =
+                document.getElementById('saveContribution');
 
-        } finally {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Adding...';
 
-            submitButton.disabled = false;
-            submitButton.textContent = 'Save Opening Capital';
-        }
-    });
+            try {
 
-    // Add fresh capital contribution
-    contributionForm.addEventListener('submit', async (event) => {
+                await apiRequest(
+                    `${API_BASE_URL}/Loan/capital-contributions`,
+                    {
+                        method: 'POST',
 
-        event.preventDefault();
+                        body: JSON.stringify({
+                            amount,
+                            description,
+                            contributionDate
+                        })
+                    }
+                );
 
-        const amount = Number(
-            document.getElementById('contributionAmount').value
-        );
+                showCustomAlert(
+                    'Capital contribution added successfully.',
+                    'success'
+                );
 
-        const description =
-            document.getElementById('contributionDescription').value.trim();
+                contributionForm.reset();
 
-        const contributionDate =
-            document.getElementById('contributionDate').value;
+                document.getElementById('contributionDate').value =
+                    getToday();
 
-        if (amount <= 0 || !description || !contributionDate) {
+                await fetchCapitalPosition();
 
-            showCustomAlert(
-                'Please provide a valid amount, description and contribution date.',
-                'error'
-            );
+            } catch (error) {
 
-            return;
-        }
+                console.error(
+                    'Failed to add capital contribution:',
+                    error
+                );
 
-        const submitButton =
-            document.getElementById('saveContribution');
+                showCustomAlert(
+                    error.message || 'Failed to add capital contribution.',
+                    'error'
+                );
 
-        submitButton.disabled = true;
-        submitButton.textContent = 'Adding...';
+            } finally {
 
-        try {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Add Capital';
+            }
+        });
+    }
 
-            await apiRequest(`${API_BASE_URL}/Loan/capital-contributions`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    amount,
-                    description,
-                    contributionDate
-                })
-            });
-
-            showCustomAlert(
-                'Capital contribution added successfully.',
-                'success'
-            );
-
-            contributionForm.reset();
-
-            document.getElementById('contributionDate').value = getToday();
-
-            await fetchCapitalPosition();
-
-        } catch (error) {
-
-            console.error('Failed to add capital contribution:', error);
-
-            showCustomAlert(
-                error.message || 'Failed to add capital contribution.',
-                'error'
-            );
-
-        } finally {
-
-            submitButton.disabled = false;
-            submitButton.textContent = 'Add Capital';
-        }
-    });
-
-    // Logout
+    // LOGOUT
     if (logoutBtn) {
 
         logoutBtn.addEventListener('click', (event) => {
@@ -382,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Initial page load
+    // INITIAL PAGE LOAD
     fetchCapitalPosition();
 
 });

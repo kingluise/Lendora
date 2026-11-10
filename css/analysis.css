@@ -1,20 +1,38 @@
 
 /* =========================================
-   FIRSTLEND PROFIT ANALYSIS
-   Dashboard-matched styling and responsiveness
+   LENDORA ANALYSIS
+   Lendora Theme + Responsive Layout
    ========================================= */
+
+/* Theme variables */
+:root {
+    --lendora-ink: #172b42;
+    --lendora-navy: #10243a;
+    --lendora-teal: #0d9488;
+    --lendora-teal-dark: #087f75;
+    --lendora-gold: #f5b84b;
+    --lendora-bg: #f3f6fa;
+    --lendora-surface: #ffffff;
+    --lendora-muted: #66778a;
+    --lendora-border: #e2e9f0;
+    --lendora-shadow: 0 12px 32px rgba(16, 36, 58, .08);
+}
 
 /* Global page layout */
 * {
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(to right, #2c3e50, #27ae60);
-    color: #fff;
     min-height: 100vh;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    background: var(--lendora-bg);
+    color: var(--lendora-ink);
 }
 
 /* =========================================
@@ -24,7 +42,8 @@ body {
 .sidebar {
     width: 250px;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.8);
+    height: 100dvh;
+    background: var(--lendora-navy);
     padding: 15px;
     position: fixed;
     left: 0;
@@ -33,6 +52,9 @@ body {
     flex-direction: column;
     z-index: 1001;
     overflow-y: auto;
+    overflow-x: hidden;
+    border-right: 1px solid rgba(255, 255, 255, .08);
+    box-shadow: 8px 0 24px rgba(16, 36, 58, .08);
 }
 
 .logo-title {
@@ -46,15 +68,16 @@ body {
     width: 60px;
     height: 60px;
     margin-right: 15px;
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+    object-fit: contain;
+    box-shadow: none;
 }
 
 .sidebar h2 {
     font-size: 20px;
     font-weight: bold;
     text-align: center;
-    color: #27ae60;
+    color: #fff;
 }
 
 .menu {
@@ -64,7 +87,7 @@ body {
 }
 
 .menu li {
-    margin: 15px 0;
+    margin: 10px 0;
 }
 
 .menu a {
@@ -72,15 +95,16 @@ body {
     align-items: center;
     gap: 10px;
     text-decoration: none;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 5px;
-    transition: background 0.3s ease;
+    color: #dce6ef;
+    padding: 11px 15px;
+    border-radius: 8px;
+    transition: background .3s ease, color .3s ease;
 }
 
 .menu a:hover,
 .menu a.active {
-    background: #27ae60;
+    background: rgba(13, 148, 136, .18);
+    color: #5eead4;
 }
 
 /* =========================================
@@ -96,7 +120,7 @@ body {
 
 .container > h1,
 .container > h2 {
-    color: #fff;
+    color: var(--lendora-ink);
     margin-top: 0;
 }
 
@@ -107,19 +131,20 @@ body {
 #profitAnalysis {
     width: 100%;
     max-width: 100%;
-    background: #fff;
-    color: #333;
-    border-radius: 10px;
+    min-width: 0;
+    background: var(--lendora-surface);
+    color: var(--lendora-ink);
+    border: 1px solid var(--lendora-border);
+    border-radius: 16px;
     padding: 25px;
     margin: 20px auto;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    min-width: 0;
+    box-shadow: var(--lendora-shadow);
 }
 
 #profitAnalysis h1,
 #profitAnalysis h2,
 #profitAnalysis h3 {
-    color: #2c3e50;
+    color: var(--lendora-ink);
 }
 
 /* =========================================
@@ -141,15 +166,15 @@ body {
     gap: 10px;
     margin-top: 10px;
     padding: 12px;
-    border: 1px solid #e5e5e5;
-    border-radius: 8px;
-    background: #f8f9fa;
+    border: 1px solid var(--lendora-border);
+    border-radius: 10px;
+    background: #f8fafc;
 }
 
 #profitAnalysisControls label {
     display: block;
-    font-weight: bold;
-    color: #2c3e50;
+    font-weight: 600;
+    color: var(--lendora-ink);
     margin-bottom: 5px;
 }
 
@@ -157,31 +182,38 @@ body {
 #profitAnalysisControls input[type="number"],
 #profitAnalysisControls input[type="date"] {
     min-height: 40px;
-    padding: 9px 12px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background: #fff;
-    color: #333;
-    font-size: 14px;
     max-width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #d6e0e9;
+    border-radius: 7px;
+    background: #fff;
+    color: var(--lendora-ink);
+    font-size: 14px;
+    outline: none;
+}
+
+#profitAnalysisControls select:focus,
+#profitAnalysisControls input:focus {
+    border-color: var(--lendora-teal);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, .12);
 }
 
 #profitAnalysisControls button {
     min-height: 40px;
     width: auto;
     padding: 10px 16px;
-    background: #27ae60;
+    background: var(--lendora-teal);
     color: #fff;
     border: none;
-    border-radius: 5px;
+    border-radius: 7px;
     cursor: pointer;
     font-size: 14px;
-    font-weight: bold;
-    transition: background 0.3s ease;
+    font-weight: 600;
+    transition: background .3s ease;
 }
 
 #profitAnalysisControls button:hover {
-    background: #219150;
+    background: var(--lendora-teal-dark);
 }
 
 /* Preserve JavaScript-controlled visibility */
@@ -210,17 +242,22 @@ body {
     width: 100%;
     min-width: 0;
     max-width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     margin-top: 15px;
     background: #fff;
-    color: #333;
+    color: var(--lendora-ink);
     font-size: 12px;
     table-layout: fixed;
+    border: 1px solid var(--lendora-border);
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 #profitAnalysisTable th,
 #profitAnalysisTable td {
-    border: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--lendora-border);
+    border-right: 1px solid var(--lendora-border);
     padding: 10px 6px;
     text-align: left;
     white-space: normal;
@@ -230,9 +267,9 @@ body {
 }
 
 #profitAnalysisTable th {
-    background: #27ae60;
-    color: #fff;
-    font-weight: bold;
+    background: #edf3f7;
+    color: #40566c;
+    font-weight: 700;
     font-size: 10px;
     line-height: 1.4;
     text-transform: uppercase;
@@ -243,11 +280,11 @@ body {
 }
 
 #profitAnalysisTable tbody tr:nth-child(even) {
-    background: #f5f5f5;
+    background: #f8fafc;
 }
 
 #profitAnalysisTable tbody tr:hover {
-    background: #e8f5ec;
+    background: #edf8f7;
 }
 
 /* =========================================
@@ -263,43 +300,44 @@ body {
 }
 
 #exportOptions label {
-    color: #2c3e50;
-    font-weight: bold;
+    color: var(--lendora-ink);
+    font-weight: 600;
 }
 
 #exportOptions button {
     width: auto;
     min-height: 40px;
     padding: 10px 18px;
-    background: #27ae60;
+    background: var(--lendora-teal);
     color: #fff;
     border: none;
-    border-radius: 5px;
+    border-radius: 7px;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: background .3s ease;
 }
 
 #exportOptions button:hover {
-    background: #219150;
+    background: var(--lendora-teal-dark);
 }
 
 /* Detailed analysis button */
 .btn-detailed-analysis {
     display: inline-block;
     padding: 11px 18px;
-    background: #27ae60;
+    background: var(--lendora-navy);
     color: #fff;
     border: none;
-    border-radius: 5px;
+    border-radius: 7px;
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
+    transition: background .3s ease;
 }
 
 .btn-detailed-analysis:hover {
-    background: #219150;
+    background: var(--lendora-teal-dark);
 }
 
 /* =========================================
@@ -308,6 +346,18 @@ body {
 
 .hidden {
     display: none !important;
+}
+
+/* =========================================
+   MOBILE MENU CONTROLS
+   ========================================= */
+
+.menu-toggle {
+    display: none;
+}
+
+.sidebar-overlay {
+    display: none;
 }
 
 /* =========================================
@@ -344,13 +394,44 @@ body {
         min-height: 100vh;
     }
 
+    /* Hamburger button */
+    .menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        width: 45px;
+        height: 42px;
+        border: none;
+        border-radius: 8px;
+        background: var(--lendora-navy);
+        color: #fff;
+        font-size: 25px;
+        cursor: pointer;
+        z-index: 1003;
+    }
+
+    /* Sliding sidebar */
     .sidebar {
-        position: relative;
-        width: 100%;
-        height: auto;
+        position: fixed;
+        top: 0;
+        left: -270px;
+        width: 250px;
+        height: 100vh;
+        height: 100dvh;
         max-height: none;
-        padding: 12px;
-        overflow: visible;
+        padding: 15px;
+        background: var(--lendora-navy);
+        overflow-y: auto;
+        overflow-x: hidden;
+        z-index: 1001;
+        transition: left .3s ease;
+    }
+
+    .sidebar.open {
+        left: 0;
     }
 
     .logo-title {
@@ -366,27 +447,48 @@ body {
         font-size: 17px;
     }
 
-    .menu {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 5px;
+    /* Keep all menu links in one vertical column */
+    .sidebar .menu {
+        display: block;
+        grid-template-columns: none;
+        flex-grow: 0;
+        padding-bottom: 20px;
     }
 
-    .menu li {
-        margin: 3px 0;
+    .sidebar .menu li {
+        display: block;
+        margin: 10px 0;
         min-width: 0;
     }
 
     .menu a {
-        padding: 10px;
+        padding: 10px 15px;
         font-size: 13px;
         overflow-wrap: anywhere;
     }
 
+    /* Dark overlay */
+    .sidebar-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(16, 36, 58, .55);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .3s ease, visibility .3s ease;
+    }
+
+    .sidebar-overlay.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Main content */
     .container {
         width: 100%;
         margin-left: 0;
-        padding: 15px;
+        padding: 70px 15px 15px;
     }
 
     #profitAnalysis {
@@ -459,11 +561,21 @@ body {
 @media (max-width: 480px) {
 
     .container {
-        padding: 10px;
+        padding: 70px 10px 15px;
     }
 
     .sidebar {
+        width: 250px;
+        left: -270px;
+        height: 100vh;
+        height: 100dvh;
         padding: 10px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .sidebar.open {
+        left: 0;
     }
 
     .logo-title {
@@ -479,19 +591,24 @@ body {
         font-size: 15px;
     }
 
-    .menu {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .sidebar .menu {
+        display: block;
+        grid-template-columns: none;
+    }
+
+    .sidebar .menu li {
+        margin: 10px 0;
     }
 
     .menu a {
-        padding: 9px 7px;
+        padding: 9px 15px;
         font-size: 12px;
         gap: 6px;
     }
 
     #profitAnalysis {
         padding: 12px;
-        border-radius: 8px;
+        border-radius: 12px;
     }
 
     #profitAnalysisControls > div {

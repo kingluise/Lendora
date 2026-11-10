@@ -1,5 +1,24 @@
 
 /* =========================
+   LENDORA CAPITAL POSITION
+   Theme + Responsive Design
+========================= */
+
+/* THEME VARIABLES */
+:root {
+    --lendora-ink: #172b42;
+    --lendora-navy: #10243a;
+    --lendora-teal: #0d9488;
+    --lendora-teal-dark: #087f75;
+    --lendora-gold: #f5b84b;
+    --lendora-bg: #f3f6fa;
+    --lendora-surface: #ffffff;
+    --lendora-muted: #66778a;
+    --lendora-border: #e2e9f0;
+    --lendora-shadow: 0 12px 32px rgba(16, 36, 58, .08);
+}
+
+/* =========================
    GLOBAL STYLES
 ========================= */
 
@@ -7,11 +26,15 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     margin: 0;
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(to right, #2c3e50, #27ae60);
-    color: #fff;
+    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    background: var(--lendora-bg);
+    color: var(--lendora-ink);
     display: flex;
     min-height: 100vh;
 }
@@ -23,7 +46,8 @@ body {
 .sidebar {
     width: 250px;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.8);
+    height: 100dvh;
+    background: var(--lendora-navy);
     padding: 15px;
     position: fixed;
     left: 0;
@@ -32,6 +56,9 @@ body {
     flex-direction: column;
     z-index: 1001;
     overflow-y: auto;
+    overflow-x: hidden;
+    border-right: 1px solid rgba(255, 255, 255, .08);
+    box-shadow: 8px 0 24px rgba(16, 36, 58, .08);
 }
 
 .logo-title {
@@ -45,15 +72,16 @@ body {
     width: 60px;
     height: 60px;
     margin-right: 15px;
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+    object-fit: contain;
+    box-shadow: none;
 }
 
 .sidebar h2 {
     font-size: 20px;
     font-weight: bold;
     text-align: center;
-    color: #27ae60;
+    color: #fff;
 }
 
 .menu {
@@ -63,7 +91,7 @@ body {
 }
 
 .menu li {
-    margin: 15px 0;
+    margin: 10px 0;
 }
 
 .menu a {
@@ -71,15 +99,16 @@ body {
     align-items: center;
     gap: 10px;
     text-decoration: none;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 5px;
-    transition: 0.3s;
+    color: #dce6ef;
+    padding: 11px 15px;
+    border-radius: 8px;
+    transition: background .3s ease, color .3s ease;
 }
 
 .menu a:hover,
 .menu li.active a {
-    background: #27ae60;
+    background: rgba(13, 148, 136, .18);
+    color: #5eead4;
 }
 
 /* =========================
@@ -91,31 +120,32 @@ body {
     position: fixed;
     top: 12px;
     left: 12px;
-    z-index: 1002;
+    z-index: 1003;
     width: 44px;
     height: 44px;
     font-size: 22px;
     line-height: 1;
-    background: rgba(0, 0, 0, 0.85);
+    background: var(--lendora-navy);
     color: #fff;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
 }
 
 .sidebar-overlay {
-    display: none;
+    display: block;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    inset: 0;
+    background: rgba(16, 36, 58, .55);
     z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s ease, visibility .3s ease;
 }
 
 .sidebar-overlay.visible {
-    display: block;
+    opacity: 1;
+    visibility: visible;
 }
 
 /* =========================
@@ -140,22 +170,25 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 20px;
-    border-radius: 10px;
+    background: var(--lendora-surface);
+    padding: 22px;
+    border: 1px solid var(--lendora-border);
+    border-radius: 16px;
     margin-bottom: 25px;
+    box-shadow: var(--lendora-shadow);
 }
 
 .page-header h1 {
     margin: 0 0 8px;
     font-size: 25px;
-    color: #fff;
+    color: var(--lendora-ink);
 }
 
 .page-header p {
     margin: 0;
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--lendora-muted);
+    line-height: 1.6;
 }
 
 /* =========================
@@ -167,10 +200,12 @@ body {
     flex-wrap: wrap;
     align-items: end;
     gap: 15px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--lendora-surface);
     padding: 20px;
-    border-radius: 10px;
+    border: 1px solid var(--lendora-border);
+    border-radius: 14px;
     margin-bottom: 25px;
+    box-shadow: var(--lendora-shadow);
 }
 
 .filter-group {
@@ -183,38 +218,40 @@ body {
 
 .filter-group label {
     font-size: 13px;
-    font-weight: bold;
+    font-weight: 600;
+    color: var(--lendora-ink);
 }
 
 input {
     width: 100%;
     padding: 11px;
-    border: none;
-    border-radius: 5px;
+    border: 1px solid #d6e0e9;
+    border-radius: 7px;
     font-size: 14px;
     outline: none;
-    color: #333;
+    color: var(--lendora-ink);
     background: #fff;
 }
 
 input:focus {
-    box-shadow: 0 0 0 2px rgba(39, 174, 96, 0.4);
+    border-color: var(--lendora-teal);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, .12);
 }
 
 button {
-    background: #27ae60;
+    background: var(--lendora-teal);
     border: none;
     padding: 11px 18px;
     color: white;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 7px;
     font-size: 13px;
-    font-weight: bold;
-    transition: 0.3s;
+    font-weight: 600;
+    transition: background .3s ease;
 }
 
 button:hover {
-    background: #219150;
+    background: var(--lendora-teal-dark);
 }
 
 button:disabled {
@@ -223,11 +260,11 @@ button:disabled {
 }
 
 .secondary-btn {
-    background: #34495e;
+    background: var(--lendora-navy);
 }
 
 .secondary-btn:hover {
-    background: #2c3e50;
+    background: #1b3b5a;
 }
 
 /* =========================
@@ -242,30 +279,32 @@ button:disabled {
 }
 
 .summary-card {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--lendora-surface);
     padding: 25px 20px;
-    border-radius: 10px;
+    border: 1px solid var(--lendora-border);
+    border-radius: 16px;
     text-align: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--lendora-shadow);
     min-width: 0;
-    transition: 0.3s;
+    transition: transform .3s ease, box-shadow .3s ease;
 }
 
 .summary-card:hover {
     transform: translateY(-3px);
+    box-shadow: 0 16px 36px rgba(16, 36, 58, .12);
 }
 
 .summary-card h3 {
     font-size: 14px;
     margin: 0 0 15px;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--lendora-muted);
 }
 
 .summary-card p {
     font-size: 23px;
     font-weight: bold;
     margin: 0;
-    color: #fff;
+    color: var(--lendora-ink);
     overflow-wrap: anywhere;
 }
 
@@ -273,12 +312,19 @@ button:disabled {
     display: block;
     margin-top: 12px;
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--lendora-muted);
 }
 
 /* Highlight current capital position */
 .summary-card:last-child {
-    background: #27ae60;
+    background: var(--lendora-navy);
+    border-color: var(--lendora-navy);
+}
+
+.summary-card:last-child h3,
+.summary-card:last-child p,
+.summary-card:last-child small {
+    color: #fff;
 }
 
 /* =========================
@@ -287,15 +333,17 @@ button:disabled {
 
 .capital-details {
     margin-bottom: 25px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--lendora-surface);
     padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--lendora-border);
+    border-radius: 16px;
+    box-shadow: var(--lendora-shadow);
 }
 
 .capital-details h2 {
     font-size: 21px;
     margin: 0 0 20px;
+    color: var(--lendora-ink);
 }
 
 .details-grid {
@@ -310,17 +358,18 @@ button:disabled {
     align-items: center;
     gap: 15px;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 7px;
+    background: #f3f6fa;
+    border: 1px solid var(--lendora-border);
+    border-radius: 9px;
     font-size: 14px;
 }
 
 .detail-item span {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--lendora-muted);
 }
 
 .detail-item strong {
-    color: #fff;
+    color: var(--lendora-ink);
     text-align: right;
     overflow-wrap: anywhere;
 }
@@ -335,12 +384,12 @@ button:disabled {
 }
 
 #expenseDetails .detail-item {
-    background: rgba(255, 255, 255, 0.1);
+    background: #f3f6fa;
 }
 
 #expenseDetails > p {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--lendora-muted);
 }
 
 /* =========================
@@ -355,22 +404,23 @@ button:disabled {
 }
 
 .management-card {
-    background: #fff;
-    color: #333;
+    background: var(--lendora-surface);
+    color: var(--lendora-ink);
     padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--lendora-border);
+    border-radius: 16px;
+    box-shadow: var(--lendora-shadow);
 }
 
 .management-card h2 {
     font-size: 20px;
-    color: #2c3e50;
+    color: var(--lendora-ink);
     margin: 0 0 12px;
 }
 
 .management-card p {
     font-size: 13px;
-    color: #666;
+    color: var(--lendora-muted);
     line-height: 1.6;
     margin-bottom: 22px;
 }
@@ -383,17 +433,17 @@ button:disabled {
     display: block;
     margin-bottom: 8px;
     font-size: 13px;
-    font-weight: bold;
-    color: #333;
+    font-weight: 600;
+    color: var(--lendora-ink);
 }
 
 .management-card input {
-    border: 1px solid #ccc;
+    border: 1px solid #d6e0e9;
 }
 
 .management-card input:focus {
-    border-color: #27ae60;
-    box-shadow: none;
+    border-color: var(--lendora-teal);
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, .12);
 }
 
 .management-card button {
@@ -420,14 +470,14 @@ button:disabled {
     gap: 15px;
     padding: 14px 16px;
     margin-bottom: 10px;
-    border-radius: 7px;
+    border-radius: 8px;
     color: white;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, .12);
     font-size: 13px;
 }
 
 .custom-alert-success {
-    background: #27ae60;
+    background: var(--lendora-teal-dark);
 }
 
 .custom-alert-error {
@@ -435,7 +485,7 @@ button:disabled {
 }
 
 .custom-alert-info {
-    background: #2980b9;
+    background: var(--lendora-navy);
 }
 
 .close-btn {
@@ -446,7 +496,7 @@ button:disabled {
 
 .fade-out {
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity .5s ease;
 }
 
 /* =========================
@@ -457,8 +507,8 @@ button:disabled {
     display: none;
     text-align: center;
     padding: 20px;
-    color: #fff;
-    font-weight: bold;
+    color: var(--lendora-ink);
+    font-weight: 600;
 }
 
 /* =========================
@@ -466,7 +516,6 @@ button:disabled {
 ========================= */
 
 @media (max-width: 1024px) {
-
     .capital-summary {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -483,7 +532,7 @@ button:disabled {
 
     .sidebar {
         left: -270px;
-        transition: left 0.3s ease;
+        transition: left .3s ease;
     }
 
     .sidebar.open {
@@ -492,6 +541,19 @@ button:disabled {
 
     .menu-toggle {
         display: block;
+    }
+
+    .sidebar .menu {
+        display: block;
+        padding-bottom: 20px;
+    }
+
+    .sidebar .menu li {
+        margin: 10px 0;
+    }
+
+    .sidebar .menu a {
+        font-size: 13px;
     }
 
     .capital-summary {
@@ -522,6 +584,10 @@ button:disabled {
         grid-template-columns: 1fr;
     }
 
+    .page-header {
+        padding: 18px;
+    }
+
     .page-header h1 {
         font-size: 21px;
     }
@@ -533,5 +599,11 @@ button:disabled {
 
     .summary-card p {
         font-size: 20px;
+    }
+
+    #customAlertContainer {
+        top: 12px;
+        right: 12px;
+        width: calc(100vw - 24px);
     }
 }

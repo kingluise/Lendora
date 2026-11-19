@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -155,7 +156,6 @@
             opacity: 1;
         }
 
-        /* The modal should be hidden by default */
         .modal.hidden {
             display: none;
         }
@@ -214,23 +214,78 @@
             display: flex;
             justify-content: space-around;
             flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .details-section .image-container img {
-            max-width: 45%;
+        .document-card {
+            flex: 1 1 180px;
+            min-width: 0;
+            max-width: 260px;
+            padding: 12px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .document-card p {
+            font-weight: 600;
+            margin: 0 0 10px;
+        }
+
+        .document-card img {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            max-height: 220px;
+            object-fit: contain;
             border-radius: 8px;
             border: 1px solid #ddd;
             padding: 5px;
-            height: auto;
+            box-sizing: border-box;
+            background: #fff;
+        }
+
+        .document-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #1769aa;
+            text-decoration: underline;
+            overflow-wrap: anywhere;
+        }
+
+        .document-status {
+            display: block;
+            margin-top: 8px;
+            font-size: 13px;
+            color: #777;
         }
 
         .export-button {
             float: right;
             margin-top: -35px;
         }
+
+        @media (max-width: 600px) {
+            .modal {
+                padding: 10px;
+            }
+
+            .modal-content {
+                padding: 18px;
+                max-height: 94vh;
+            }
+
+            .document-card {
+                flex-basis: 100%;
+                max-width: 100%;
+            }
+        }
     </style>
+
     <link rel="stylesheet" href="css/lendora-theme.css">
 </head>
+
 <body>
 
     <div class="rolling-load">
@@ -249,6 +304,7 @@
             <img src="images/lendora.svg" alt="Logo" class="logo">
             <h2>LENDORA</h2>
         </div>
+
         <ul class="menu">
             <li><a href="dashboard.html">🏠 Home</a></li>
             <li class="active"><a href="customer.html">👥 Manage Customers</a></li>
@@ -274,220 +330,295 @@
 
         <div class="customer-list-section card">
             <h3>Customer List</h3>
+
             <div class="table-scroll">
-            <table id="customer-list">
-                <thead>
-                    <tr>
-                        <th>S/N</th>
-                        <th>Customer ID</th>
-                        <th>Full Name</th>
-                        <th>Phone Number</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="customer-list-body">
-                    <tr><td colspan="5" class="text-center">Loading customers...</td></tr>
-                </tbody>
-            </table>
+                <table id="customer-list">
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>Customer ID</th>
+                            <th>Full Name</th>
+                            <th>Phone Number</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="customer-list-body">
+                        <tr>
+                            <td colspan="5" class="text-center">Loading customers...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
+
             <div id="customerPagination" class="pagination-controls"></div>
         </div>
     </div>
 
+
+    <!-- =========================================
+         ADD CUSTOMER MODAL
+    ========================================== -->
+
     <div id="customerFormContainer" class="modal hidden">
         <div class="modal-content">
+
             <span class="close-button cancel-form">&times;</span>
+
             <h3>Add New Customer</h3>
+
             <form id="customerForm">
+
                 <div class="form-group">
                     <label for="fullName">Full Name:</label>
                     <input type="text" id="fullName" name="fullName" required>
                 </div>
+
                 <div class="form-group">
                     <label for="dateOfBirth">Date of Birth:</label>
                     <input type="date" id="dateOfBirth" name="dateOfBirth" required>
                 </div>
+
                 <div class="form-group">
                     <label for="gender">Gender:</label>
                     <input type="text" id="gender" name="gender" required>
                 </div>
+
                 <div class="form-group">
                     <label for="maritalStatus">Marital Status:</label>
                     <input type="text" id="maritalStatus" name="maritalStatus" required>
                 </div>
+
                 <div class="form-group">
                     <label for="residentialAddress">Residential Address:</label>
                     <input type="text" id="residentialAddress" name="residentialAddress" required>
                 </div>
+
                 <div class="form-group">
                     <label for="email">Email:</label>
                     <input type="email" id="email" name="email" required>
                 </div>
+
                 <div class="form-group">
                     <label for="phoneNumber">Phone Number:</label>
                     <input type="tel" id="phoneNumber" name="phoneNumber" required>
                 </div>
+
                 <div class="form-group">
                     <label for="employmentStatus">Employment Status:</label>
                     <input type="text" id="employmentStatus" name="employmentStatus" required>
                 </div>
+
                 <div class="form-group">
                     <label for="monthlyIncome">Monthly Income:</label>
                     <input type="number" id="monthlyIncome" name="monthlyIncome" required>
                 </div>
+
                 <div class="form-group">
                     <label for="idType">ID Type:</label>
                     <input type="text" id="idType" name="idType" required>
                 </div>
+
                 <div class="form-group">
                     <label for="idNumber">ID Number:</label>
                     <input type="text" id="idNumber" name="idNumber" required>
                 </div>
+
                 <div class="form-group">
                     <label for="nin">NIN:</label>
                     <input type="text" id="nin" name="nin" required>
                 </div>
+
                 <div class="form-group">
                     <label for="bvn">BVN:</label>
                     <input type="text" id="bvn" name="bvn" required>
                 </div>
+
                 <div class="form-group">
                     <label for="guarantorFullName">Guarantor Full Name:</label>
                     <input type="text" id="guarantorFullName" name="guarantorFullName" required>
                 </div>
+
                 <div class="form-group">
                     <label for="guarantorRelationship">Guarantor Relationship:</label>
                     <input type="text" id="guarantorRelationship" name="guarantorRelationship" required>
                 </div>
+
                 <div class="form-group">
                     <label for="guarantorAddress">Guarantor Address:</label>
                     <input type="text" id="guarantorAddress" name="guarantorAddress" required>
                 </div>
+
                 <div class="form-group">
                     <label for="guarantorPhone">Guarantor Phone:</label>
                     <input type="tel" id="guarantorPhone" name="guarantorPhone" required>
                 </div>
+
                 <div class="form-group">
                     <label for="guarantorEmail">Guarantor Email:</label>
                     <input type="email" id="guarantorEmail" name="guarantorEmail" required>
                 </div>
+
                 <div class="form-group">
                     <label for="guarantorIdType">Guarantor ID Type:</label>
                     <input type="text" id="guarantorIdType" name="guarantorIdType" required>
                 </div>
+
                 <div class="form-group">
                     <label for="guarantorIdNumber">Guarantor ID Number:</label>
                     <input type="text" id="guarantorIdNumber" name="guarantorIdNumber" required>
                 </div>
+
                 <div class="form-actions">
                     <button type="submit" class="submit-button">Submit</button>
                     <button type="button" class="cancel-form cancel-button">Cancel</button>
                 </div>
+
             </form>
         </div>
     </div>
 
+
+    <!-- =========================================
+         EDIT CUSTOMER MODAL
+    ========================================== -->
+
     <div id="editModal" class="modal hidden">
         <div class="modal-content card">
+
             <span class="close-button" id="closeEditModalBtn">&times;</span>
+
             <h3>Edit Customer</h3>
+
             <form id="editForm">
+
                 <div class="form-group">
                     <label for="editFullName">Full Name:</label>
                     <input type="text" id="editFullName" name="fullName" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editDateOfBirth">Date of Birth:</label>
                     <input type="date" id="editDateOfBirth" name="dateOfBirth" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editGender">Gender:</label>
                     <input type="text" id="editGender" name="gender" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editMaritalStatus">Marital Status:</label>
                     <input type="text" id="editMaritalStatus" name="maritalStatus" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editResidentialAddress">Residential Address:</label>
                     <input type="text" id="editResidentialAddress" name="residentialAddress" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editEmail">Email:</label>
                     <input type="email" id="editEmail" name="email" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editPhoneNumber">Phone Number:</label>
                     <input type="tel" id="editPhoneNumber" name="phoneNumber" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editEmploymentStatus">Employment Status:</label>
                     <input type="text" id="editEmploymentStatus" name="employmentStatus" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editMonthlyIncome">Monthly Income:</label>
                     <input type="number" id="editMonthlyIncome" name="monthlyIncome" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editIdType">ID Type:</label>
                     <input type="text" id="editIdType" name="idType" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editIdNumber">ID Number:</label>
                     <input type="text" id="editIdNumber" name="idNumber" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editNin">NIN:</label>
                     <input type="text" id="editNin" name="nin" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editBvn">BVN:</label>
                     <input type="text" id="editBvn" name="bvn" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editGuarantorFullName">Guarantor Full Name:</label>
                     <input type="text" id="editGuarantorFullName" name="guarantorFullName" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editGuarantorRelationship">Guarantor Relationship:</label>
                     <input type="text" id="editGuarantorRelationship" name="guarantorRelationship" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editGuarantorAddress">Guarantor Address:</label>
                     <input type="text" id="editGuarantorAddress" name="guarantorAddress" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editGuarantorPhone">Guarantor Phone:</label>
                     <input type="tel" id="editGuarantorPhone" name="guarantorPhone" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editGuarantorEmail">Guarantor Email:</label>
                     <input type="email" id="editGuarantorEmail" name="guarantorEmail" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editGuarantorIdType">Guarantor ID Type:</label>
                     <input type="text" id="editGuarantorIdType" name="guarantorIdType" required>
                 </div>
+
                 <div class="form-group">
                     <label for="editGuarantorIdNumber">Guarantor ID Number:</label>
                     <input type="text" id="editGuarantorIdNumber" name="guarantorIdNumber" required>
                 </div>
+
                 <div class="form-actions">
                     <button type="submit" class="submit-button">Save Changes</button>
                     <button type="button" class="cancel-button cancel-edit-button">Cancel</button>
                 </div>
+
             </form>
         </div>
     </div>
 
+
+    <!-- =========================================
+         VIEW CUSTOMER MODAL
+    ========================================== -->
+
     <div id="viewCustomerModal" class="modal hidden">
         <div class="modal-content card">
+
             <span class="close-button" id="closeViewCustomerModalBtn">&times;</span>
+
             <h3>Customer Details</h3>
 
             <div id="customerDetailsContent">
+
+                <!-- PERSONAL INFORMATION -->
                 <div class="details-section">
                     <h4>Personal Information</h4>
+
                     <p><strong>Customer ID:</strong> <span id="viewCustomerId"></span></p>
                     <p><strong>Full Name:</strong> <span id="viewFullName"></span></p>
                     <p><strong>Date of Birth:</strong> <span id="viewDob"></span></p>
@@ -495,30 +626,115 @@
                     <p><strong>Marital Status:</strong> <span id="viewMaritalStatus"></span></p>
                     <p><strong>Residential Address:</strong> <span id="viewResidentialAddress"></span></p>
                 </div>
+
+
+                <!-- CONTACT INFORMATION -->
                 <div class="details-section">
                     <h4>Contact Information</h4>
+
                     <p><strong>Email:</strong> <span id="viewEmail"></span></p>
                     <p><strong>Phone Number:</strong> <span id="viewPhone"></span></p>
                 </div>
+
+
+                <!-- EMPLOYMENT AND FINANCIAL INFORMATION -->
                 <div class="details-section">
                     <h4>Employment & Financial</h4>
+
                     <p><strong>Employment Status:</strong> <span id="viewEmploymentStatus"></span></p>
                     <p><strong>Monthly Income:</strong> <span id="viewIncome"></span></p>
                 </div>
+
+
+                <!-- BANK DETAILS -->
+                <div class="details-section">
+                    <h4>Bank Details</h4>
+
+                    <p><strong>Bank Name:</strong> <span id="viewBankName"></span></p>
+                    <p><strong>Account Name:</strong> <span id="viewAccountName"></span></p>
+                    <p><strong>Account Number:</strong> <span id="viewAccountNumber"></span></p>
+                </div>
+
+
+                <!-- APPLICANT IDENTIFICATION -->
                 <div class="details-section">
                     <h4>Identification</h4>
+
                     <p><strong>ID Type:</strong> <span id="viewIdType"></span></p>
                     <p><strong>ID Number:</strong> <span id="viewIdNumber"></span></p>
                     <p><strong>NIN:</strong> <span id="viewNin"></span></p>
                     <p><strong>BVN:</strong> <span id="viewBvn"></span></p>
-                    <br>
+                </div>
+
+
+                <!-- APPLICANT DOCUMENTS -->
+                <div class="details-section">
+                    <h4>Applicant Documents</h4>
+
                     <div class="image-container">
-                        <img id="viewIdPhoto" alt="ID Photo" onerror="this.src='https://placehold.co/400x300/e0e0e0/555?text=ID+Photo+Not+Found'">
-                        <img id="viewPassportPhoto" alt="Passport Photo" onerror="this.src='https://placehold.co/400x300/e0e0e0/555?text=Passport+Photo+Not+Found'">
+
+                        <div class="document-card">
+                            <p>Passport Photograph</p>
+
+                            <img id="viewPassportPhoto" alt="Applicant Passport" hidden>
+
+                            <a id="viewPassportPhotoLink"
+                               class="document-link"
+                               target="_blank"
+                               rel="noopener"
+                               hidden>
+                                Open document
+                            </a>
+
+                            <span id="viewPassportPhotoStatus" class="document-status">
+                                Not loaded
+                            </span>
+                        </div>
+
+                        <div class="document-card">
+                            <p>Identification Document</p>
+
+                            <img id="viewIdPhoto" alt="Applicant ID" hidden>
+
+                            <a id="viewIdPhotoLink"
+                               class="document-link"
+                               target="_blank"
+                               rel="noopener"
+                               hidden>
+                                Open document
+                            </a>
+
+                            <span id="viewIdPhotoStatus" class="document-status">
+                                Not loaded
+                            </span>
+                        </div>
+
+                        <div class="document-card">
+                            <p>Utility Bill</p>
+
+                            <img id="viewUtilityBill" alt="Applicant Utility Bill" hidden>
+
+                            <a id="viewUtilityBillLink"
+                               class="document-link"
+                               target="_blank"
+                               rel="noopener"
+                               hidden>
+                                Open document
+                            </a>
+
+                            <span id="viewUtilityBillStatus" class="document-status">
+                                Not loaded
+                            </span>
+                        </div>
+
                     </div>
                 </div>
+
+
+                <!-- GUARANTOR INFORMATION -->
                 <div class="details-section">
                     <h4>Guarantor Information</h4>
+
                     <p><strong>Full Name:</strong> <span id="viewGuarantorFullName"></span></p>
                     <p><strong>Relationship:</strong> <span id="viewRelationshipToBorrower"></span></p>
                     <p><strong>Address:</strong> <span id="viewGuarantorResidentialAddress"></span></p>
@@ -527,14 +743,94 @@
                     <p><strong>ID Type:</strong> <span id="viewGuarantorIdType"></span></p>
                     <p><strong>ID Number:</strong> <span id="viewGuarantorIdNumber"></span></p>
                 </div>
+
+
+                <!-- GUARANTOR DOCUMENTS -->
+                <div class="details-section">
+                    <h4>Guarantor Documents</h4>
+
+                    <div class="image-container">
+
+                        <div class="document-card">
+                            <p>Guarantor Passport</p>
+
+                            <img id="viewGuarantorPassport" alt="Guarantor Passport" hidden>
+
+                            <a id="viewGuarantorPassportLink"
+                               class="document-link"
+                               target="_blank"
+                               rel="noopener"
+                               hidden>
+                                Open document
+                            </a>
+
+                            <span id="viewGuarantorPassportStatus" class="document-status">
+                                Not loaded
+                            </span>
+                        </div>
+
+                        <div class="document-card">
+                            <p>Guarantor ID</p>
+
+                            <img id="viewGuarantorId" alt="Guarantor ID" hidden>
+
+                            <a id="viewGuarantorIdLink"
+                               class="document-link"
+                               target="_blank"
+                               rel="noopener"
+                               hidden>
+                                Open document
+                            </a>
+
+                            <span id="viewGuarantorIdStatus" class="document-status">
+                                Not loaded
+                            </span>
+                        </div>
+
+                        <div class="document-card">
+                            <p>Guarantor Utility Bill</p>
+
+                            <img id="viewGuarantorUtilityBill"
+                                 alt="Guarantor Utility Bill"
+                                 hidden>
+
+                            <a id="viewGuarantorUtilityBillLink"
+                               class="document-link"
+                               target="_blank"
+                               rel="noopener"
+                               hidden>
+                                Open document
+                            </a>
+
+                            <span id="viewGuarantorUtilityBillStatus" class="document-status">
+                                Not loaded
+                            </span>
+                        </div>
+
+                    </div>
+                </div>
+
             </div>
+
             <div class="form-actions">
-                <button type="button" class="cancel-button" id="closeViewCustomerModalBtn">Close</button>
+                <button type="button" class="export-button" id="exportPdfBtn">
+                    Export PDF
+                </button>
+
+                <button type="button"
+                        class="cancel-button"
+                        id="closeViewCustomerModalFooterBtn">
+                    Close
+                </button>
             </div>
+
         </div>
     </div>
 
+
+    <!-- EXISTING SCRIPTS -->
     <script src="js/customer.js" defer></script>
+
     <script>
         // Mobile sidebar toggle
         document.addEventListener('DOMContentLoaded', function() {
@@ -546,6 +842,7 @@
                 sidebar.classList.add('open');
                 overlay.classList.add('visible');
             }
+
             function closeSidebar() {
                 sidebar.classList.remove('open');
                 overlay.classList.remove('visible');
@@ -564,7 +861,22 @@
             sidebar?.querySelectorAll('a').forEach(link => {
                 link.addEventListener('click', closeSidebar);
             });
+
+            // Footer close button for customer details
+            document.getElementById('closeViewCustomerModalFooterBtn')
+                ?.addEventListener('click', () => {
+                    document.getElementById('closeViewCustomerModalBtn')?.click();
+                });
+
+            // Close edit modal using its existing close icon
+            document.getElementById('closeEditModalBtn')
+                ?.addEventListener('click', () => {
+                    const editModal = document.getElementById('editModal');
+                    editModal?.classList.remove('visible');
+                    editModal?.classList.add('hidden');
+                });
         });
     </script>
+
 </body>
 </html>

@@ -4,7 +4,7 @@
   "name": "Lendora",
   "short_name": "Lendora",
   "description": "Lendora loan management",
-  "start_url": "apply.html",
+  "start_url": "index.html",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",

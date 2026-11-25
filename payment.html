@@ -1,3 +1,4 @@
+ 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -195,6 +196,77 @@
         .action-button { padding: 8px 14px; border-radius: 6px; cursor: pointer; }
         .approve-btn { background: #28a745; color: #fff; }
         .reject-btn { background: #dc3545; color: #fff; }
+
+        /* Full Loan Settlement */
+        .settlement-panel {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #e1e5eb;
+            border-left: 4px solid #FCA311;
+            border-radius: 10px;
+            background: #f8f9fc;
+        }
+
+        .settlement-panel h4 {
+            margin-top: 0;
+            color: #14213D;
+        }
+
+        .settlement-description {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .settlement-amount {
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: #fff;
+            border: 1px solid #e1e5eb;
+        }
+
+        .settlement-amount strong {
+            display: block;
+            margin-top: 6px;
+            color: #14213D;
+            font-size: 1.5rem;
+        }
+
+        .settlement-button {
+            background: #14213D;
+            color: #fff;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .settlement-button:hover {
+            background: #FCA311;
+            color: #14213D;
+        }
+
+        .settlement-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .settlement-result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #d6e8dc;
+            background: #f1f8f3;
+            color: #245b36;
+        }
+
+        .settlement-result p {
+            margin: 6px 0;
+        }
+
+        .settlement-status {
+            font-weight: 600;
+        }
     </style>
     <link rel="stylesheet" href="css/lendora-theme.css">
 </head>
@@ -277,6 +349,49 @@
                         </table>
                         </div>
                         <input type="hidden" id="selectedPaymentPlanItemId" name="selectedPaymentPlanItemId">
+
+                        <!-- Full Loan Settlement Summary -->
+                        <div id="fullSettlementPanel" class="settlement-panel hidden">
+                            <h4>Full Loan Settlement</h4>
+                            <p class="settlement-description">
+                                This option settles all outstanding installments on this loan.
+                                The settlement amount includes the remaining scheduled principal
+                                and interest. It will remain pending until an Admin approves it.
+                            </p>
+
+                            <div class="settlement-amount">
+                                <span>Outstanding Settlement Amount</span>
+                                <strong id="settlementAmount">₦0.00</strong>
+                                <small id="settlementInstallmentCount">
+                                    0 outstanding installments
+                                </small>
+                            </div>
+
+                            <button
+                                type="button"
+                                id="settleFullLoanBtn"
+                                class="settlement-button">
+                                Initiate Full Settlement
+                            </button>
+
+                            <div
+                                id="settlementResult"
+                                class="settlement-result hidden"
+                                role="status"
+                                aria-live="polite">
+                                <p id="settlementResultMessage"></p>
+                                <p>
+                                    Settlement Reference:
+                                    <strong id="settlementReference"></strong>
+                                </p>
+                                <p>
+                                    Status:
+                                    <strong class="settlement-status" id="settlementStatus">
+                                        Pending Admin Approval
+                                    </strong>
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="paymentDetails" class="hidden">
